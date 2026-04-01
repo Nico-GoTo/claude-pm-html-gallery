@@ -15,6 +15,51 @@
     "file": "analyses/Resolve_VoC_80-20_Analysis.html"
   },
   {
+    "title": "PM Pitch Workflow — From Idea to Opportunity Council",
+    "author": "Team",
+    "date": "2026-04-01",
+    "summary": "How to use Claude Cowork to turn a product idea into a JIRA pitch item, ready for leadership review.",
+    "tags": [
+      "Resolve",
+      "AI",
+      "RMM",
+      "analytics",
+      "competitive",
+      "strategy"
+    ],
+    "file": "analyses/pm-pitch-workflow.html"
+  },
+  {
+    "title": "Proactive Endpoint Diagnostics — GoTo Resolve Pitch",
+    "author": "Team",
+    "date": "2026-04-01",
+    "summary": "A lightweight, deterministic health scoring engine that surfaces endpoint issues to IT technicians before users file tickets — built natively into GoTo Resolve.",
+    "tags": [
+      "Resolve",
+      "AI",
+      "RMM",
+      "analytics",
+      "competitive",
+      "strategy"
+    ],
+    "file": "analyses/proactive-diagnostics-pitch.html"
+  },
+  {
+    "title": "Resolve Device Data — Pipeline Architecture",
+    "author": "Team",
+    "date": "2026-04-01",
+    "summary": "End-to-end telemetry pipeline: from endpoint agents collecting raw system data to cloud-processed, queryable device intelligence at scale.",
+    "tags": [
+      "Resolve",
+      "Nexus",
+      "AI",
+      "RMM",
+      "analytics",
+      "strategy"
+    ],
+    "file": "analyses/resolve-device-data-viz.html"
+  },
+  {
     "title": "GoTo Resolve — Troubleshooting Agent: Technical Overview",
     "author": "Team",
     "date": "2026-04-01",
@@ -58,50 +103,5 @@
       "analytics"
     ],
     "file": "analyses/weekly-sales-digest-2026-03-30.html"
-  },
-  {
-    "title": "Resolve Device Data — Pipeline Architecture",
-    "author": "Team",
-    "date": "2026-03-28",
-    "summary": "End-to-end telemetry pipeline: from endpoint agents collecting raw system data to cloud-processed, queryable device intelligence at scale.",
-    "tags": [
-      "Resolve",
-      "Nexus",
-      "AI",
-      "RMM",
-      "analytics",
-      "strategy"
-    ],
-    "file": "analyses/resolve-device-data-viz.html"
-  },
-  {
-    "title": "Proactive Endpoint Diagnostics — GoTo Resolve Pitch",
-    "author": "Team",
-    "date": "2026-03-21",
-    "summary": "A lightweight, deterministic health scoring engine that surfaces endpoint issues to IT technicians before users file tickets — built natively into GoTo Resolve.",
-    "tags": [
-      "Resolve",
-      "AI",
-      "RMM",
-      "analytics",
-      "competitive",
-      "strategy"
-    ],
-    "file": "analyses/proactive-diagnostics-pitch.html"
-  },
-  {
-    "title": "PM Pitch Workflow — From Idea to Opportunity Council",
-    "author": "Team",
-    "date": "2026-03-20",
-    "summary": "How to use Claude Cowork to turn a product idea into a JIRA pitch item, ready for leadership review.",
-    "tags": [
-      "Resolve",
-      "AI",
-      "RMM",
-      "analytics",
-      "competitive",
-      "strategy"
-    ],
-    "file": "analyses/pm-pitch-workflow.html"
   }
 ]
