@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Proactive Endpoint Diagnostics — GoTo Resolve Pitch</title>
+  <style>
+    :root {
+      --blue: #0057FF;
+      --blue-light: #EEF3FF;
+      --green: #00B67A;
+      --green-light: #E6F7F2;
+      --amber: #F5A623;
+      --amber-light: #FEF6E7;
+      --red: #E03434;
+      --red-light: #FDEAEA;
+      --grey-bg: #F5F6FA;
+      --grey-border: #E0E3ED;
+      --text: #1A1D2E;
+      --text-muted: #6B7280;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0039B3 0%, #0057FF 60%, #3381FF 100%);
+      color: white;
+      padding: 56px 48px 48px;
+    }
+    .header-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      margin-bottom: 18px;
+    }
+    .header h1 {
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.2;
+      max-width: 640px;
+      margin-bottom: 14px;
+    }
+    .header p {
+      font-size: 17px;
+      opacity: 0.88;
+      max-width: 620px;
+      margin-bottom: 32px;
+    }
+    .header-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .header-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .header-meta-item .label {
+      font-size: 11px;
+      opacity: 0.65;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .header-meta-item .value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    .section {
+      margin-bottom: 36px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--grey-border);
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--grey-border);
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 14.5px;
+      color: #374151;
+      line-height: 1.7;
+    }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+    /* ── STAT CARDS ── */
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--grey-border);
+      border-radius: 12px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .stat-card .stat-number {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--blue);
+    }
+    .stat-card .stat-label {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .stat-card.green .stat-number { color: var(--green); }
+    .stat-card.amber .stat-number { color: var(--amber); }
+
+    /* ── PROBLEM BULLETS ── */
+    .problem-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .problem-list li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14.5px;
+      color: #374151;
+      line-height: 1.6;
+    }
+    .problem-list li .icon {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      background: var(--red-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .problem-list li .icon svg { width: 11px; height: 11px; }
+
+    /* ── WHY NOW ── */
+    .why-now-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .why-now-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--white);
+      border: 1px solid var(--grey-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .why-now-num {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .why-now-item h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .why-now-item p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .why-now-item .stat-highlight {
+      display: inline-block;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-top: 6px;
+    }
+
+    /* ── COMPETITIVE TABLE ── */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .comp-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      border-bottom: 2px solid var(--grey-border);
+      background: var(--grey-bg);
+    }
+    .comp-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--grey-border);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:hover td { background: var(--grey-bg); }
+    .vendor-name {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .our-advantage {
+      background: var(--blue-light) !important;
+      border-left: 3px solid var(--blue);
+    }
+    .our-advantage .vendor-name { color: var(--blue); }
+    .advantage-tag {
+      display: inline-block;
+      background: var(--blue);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── PHASES ── */
+    .phases {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .phase-card {
+      border-radius: 12px;
+      padding: 24px 26px;
+      border: 1px solid var(--grey-border);
+    }
+    .phase-card.phase-1 {
+      background: var(--blue-light);
+      border-color: #C0D0FF;
+    }
+    .phase-card.phase-2 {
+      background: var(--white);
+    }
+    .phase-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .phase-1 .phase-tag { background: var(--blue); color: white; }
+    .phase-2 .phase-tag { background: var(--grey-border); color: var(--text-muted); }
+    .phase-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+    .phase-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .phase-bullets li {
+      font-size: 13.5px;
+      color: #374151;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+    .phase-bullets li::before {
+      content: '→';
+      color: var(--blue);
+      font-weight: 700;
+      margin-top: 0px;
+      flex-shrink: 0;
+    }
+    .phase-2 .phase-bullets li::before { color: var(--text-muted); }
+
+    /* ── SUCCESS METRICS ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .metric-card {
+      background: var(--white);
+      border: 1px solid var(--grey-border);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .metric-icon {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+    }
+    .metric-card:nth-child(1) .metric-icon { background: var(--blue-light); }
+    .metric-card:nth-child(2) .metric-icon { background: var(--green-light); }
+    .metric-card:nth-child(3) .metric-icon { background: var(--amber-light); }
+    .metric-card:nth-child(4) .metric-icon { background: #F3E8FF; }
+    .metric-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .metric-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .metric-card .metric-target {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+    .metric-card:nth-child(1) .metric-target { background: var(--blue-light); color: var(--blue); }
+    .metric-card:nth-child(2) .metric-target { background: var(--green-light); color: var(--green); }
+    .metric-card:nth-child(3) .metric-target { background: var(--amber-light); color: #B45309; }
+    .metric-card:nth-child(4) .metric-target { background: #F3E8FF; color: #7C3AED; }
+
+    /* ── DECISIONS ── */
+    .decisions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .decision-item {
+      background: var(--white);
+      border: 1px solid var(--grey-border);
+      border-left: 3px solid var(--amber);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+    .decision-item h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .decision-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── DATA GAP BANNER ── */
+    .gap-banner {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 10px;
+      padding: 18px 22px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-top: 36px;
+    }
+    .gap-banner .gap-icon {
+      font-size: 20px;
+      margin-top: 1px;
+    }
+    .gap-banner h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #92400E;
+      margin-bottom: 8px;
+    }
+    .gap-banner ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .gap-banner ul li {
+      font-size: 13px;
+      color: #78350F;
+      display: flex;
+      gap: 8px;
+    }
+    .gap-banner ul li::before { content: '·'; font-weight: 700; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--grey-border);
+      margin-top: 20px;
+    }
+
+    @media (max-width: 720px) {
+      .grid-2, .grid-3, .grid-4, .phases, .metrics-grid { grid-template-columns: 1fr; }
+      .header { padding: 36px 24px; }
+      .header h1 { font-size: 26px; }
+      .container { padding: 28px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-tag">Product Pitch · Phase 1</div>
+  <h1>Proactive Endpoint Diagnostics</h1>
+  <p>A lightweight, deterministic health scoring engine that surfaces endpoint issues to IT technicians <em>before</em> users file tickets — built natively into GoTo Resolve.</p>
+  <div class="header-meta">
+    <div class="header-meta-item">
+      <span class="label">Persona</span>
+      <span class="value">IT Technician / Helpdesk</span>
+    </div>
+    <div class="header-meta-item">
+      <span class="label">Scope</span>
+      <span class="value">Performance + Security</span>
+    </div>
+    <div class="header-meta-item">
+      <span class="label">Stage</span>
+      <span class="value">Pitch — Awaiting Phase 1 Approval</span>
+    </div>
+    <div class="header-meta-item">
+      <span class="label">Strategic Driver</span>
+      <span class="value">Board Mandate: Reactive → Proactive IT</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- MARKET STATS -->
+  <div class="section">
+    <div class="section-title">The Opportunity at a Glance</div>
+    <div class="grid-4">
+      <div class="stat-card">
+        <div class="stat-number">$7B</div>
+        <div class="stat-label">DEX market size by 2033 (15% CAGR)</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-number">85%</div>
+        <div class="stat-label">Reduction in severe incidents with proactive RMM</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-number">53%</div>
+        <div class="stat-label">of orgs cite security as their #1 IT selection criterion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$16.4B</div>
+        <div class="stat-label">Proactive IT services market by 2029 (21.4% CAGR)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE IDEA -->
+  <div class="section">
+    <div class="section-title">The Idea</div>
+    <div class="card">
+      <p>We add a <strong>lightweight, deterministic endpoint health scoring engine</strong> to GoTo Resolve that continuously evaluates endpoints across performance and security dimensions — and surfaces actionable findings to IT technicians <em>before</em> users file tickets. Unlike enterprise-grade DEX platforms such as Nexthink, this is designed to be fast to deploy, easy to interpret, and built for the SMB and mid-market technicians who already use Resolve. Think of it as a proactive assistant that spots the fire before the smoke alarm goes off.</p>
+    </div>
+  </div>
+
+  <!-- THE PROBLEM -->
+  <div class="section">
+    <div class="section-title">The Problem</div>
+    <div class="card">
+      <p style="margin-bottom: 18px;">Today, GoTo Resolve is fundamentally a reactive tool. Technicians respond to tickets, join remote sessions, and fix issues after users are already impacted. This is the exact mode our board has flagged as a strategic liability.</p>
+      <ul class="problem-list">
+        <li>
+          <span class="icon">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5" stroke="#E03434" stroke-width="1.5"/><line x1="6" y1="3.5" x2="6" y2="6.5" stroke="#E03434" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="8.5" r="0.75" fill="#E03434"/></svg>
+          </span>
+          Technicians spend the majority of their time responding to issues rather than preventing them — the ticket queue never empties.
+        </li>
+        <li>
+          <span class="icon">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5" stroke="#E03434" stroke-width="1.5"/><line x1="6" y1="3.5" x2="6" y2="6.5" stroke="#E03434" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="8.5" r="0.75" fill="#E03434"/></svg>
+          </span>
+          End users experience productivity loss before IT is even aware. A machine at 95% memory for three days doesn't generate a ticket — it generates a frustrated user who eventually can't work.
+        </li>
+        <li>
+          <span class="icon">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5" stroke="#E03434" stroke-width="1.5"/><line x1="6" y1="3.5" x2="6" y2="6.5" stroke="#E03434" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="8.5" r="0.75" fill="#E03434"/></svg>
+          </span>
+          Security gaps — missing patches, disabled antivirus, unencrypted drives — sit undetected until an incident occurs or an audit fails.
+        </li>
+        <li>
+          <span class="icon">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5" stroke="#E03434" stroke-width="1.5"/><line x1="6" y1="3.5" x2="6" y2="6.5" stroke="#E03434" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="8.5" r="0.75" fill="#E03434"/></svg>
+          </span>
+          This is a <strong>long-standing customer ask</strong> and a <strong>direct board request</strong> to shift our product posture from reactive to proactive. We have heard this consistently across segments, but have yet to ship a native answer to it.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- WHY NOW -->
+  <div class="section">
+    <div class="section-title">Why Now</div>
+    <div class="why-now-list">
+      <div class="why-now-item">
+        <div class="why-now-num">1</div>
+        <div>
+          <h4>Board Mandate</h4>
+          <p>Leadership has explicitly asked for a strategic shift from reactive to proactive IT. This feature is the most direct product answer to that mandate — and we don't yet have one.</p>
+        </div>
+      </div>
+      <div class="why-now-item">
+        <div class="why-now-num">2</div>
+        <div>
+          <h4>Market Acceleration</h4>
+          <p>Organizations transitioning to proactive RMM models have demonstrated measurable results that customers are now citing back to us.</p>
+          <span class="stat-highlight">Up to 85% reduction in severe incidents and major outages</span>
+        </div>
+      </div>
+      <div class="why-now-item">
+        <div class="why-now-num">3</div>
+        <div>
+          <h4>Competitive Pressure</h4>
+          <p>Nexthink is actively marketing a "lightweight" SMB monitoring story, and TeamViewer is positioning itself as a Nexthink alternative for mid-market. If we don't build this natively, we create surface area for DEX vendors to land in our accounts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPETITIVE LANDSCAPE -->
+  <div class="section">
+    <div class="section-title">Competitive Landscape</div>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th style="width:18%">Vendor</th>
+            <th style="width:38%">Approach</th>
+            <th>Weakness vs. Resolve</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="our-advantage">
+            <td class="vendor-name">GoTo Resolve <span class="advantage-tag">Us</span></td>
+            <td>Native endpoint agent + RMM alerts + remote session + technician workflow — proactive diagnostics added as an intelligence layer on top of existing infrastructure</td>
+            <td><strong>End-to-end workflow advantage:</strong> a technician receives a finding and can immediately act in the same tool, same session — no context switching. No competitor offers this.</td>
+          </tr>
+          <tr>
+            <td class="vendor-name">Nexthink</td>
+            <td>Full DEX platform — deep analytics, employee sentiment, automation</td>
+            <td>Enterprise-only pricing, complex 6–12 month deployments, no SMB fit</td>
+          </tr>
+          <tr>
+            <td class="vendor-name">ControlUp</td>
+            <td>Endpoint monitoring + security focus, Netscaler integration</td>
+            <td>Not embedded in an RMM; requires separate deployment</td>
+          </tr>
+          <tr>
+            <td class="vendor-name">Liquidware</td>
+            <td>In-depth diagnostics and assessment tooling</td>
+            <td>Point tool, not part of an integrated helpdesk/RMM workflow</td>
+          </tr>
+          <tr>
+            <td class="vendor-name">TeamViewer</td>
+            <td>Marketing itself as a Nexthink alternative for mid-market</td>
+            <td>Competes with Resolve across the board — converging feature sets</td>
+          </tr>
+          <tr>
+            <td class="vendor-name">MS Intune</td>
+            <td>Native Windows health scoring and proactive remediations</td>
+            <td>Only for Microsoft-heavy orgs; no helpdesk workflow integration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROPOSED APPROACH -->
+  <div class="section">
+    <div class="section-title">Proposed Approach</div>
+    <div class="phases">
+      <div class="phase-card phase-1">
+        <span class="phase-tag">Phase 1 · MVP</span>
+        <h3>Endpoint Health Score + Technician Findings Feed</h3>
+        <ul class="phase-bullets">
+          <li>Deterministic scoring model across <strong>performance health</strong> (CPU, memory, disk, battery) and <strong>security posture</strong> (patch status, AV state, encryption, firewall)</li>
+          <li>Composite health score (0–100) per endpoint, recalculated on a configurable cadence</li>
+          <li>Dedicated <strong>Proactive Findings</strong> view in the Resolve dashboard — filterable by severity, device, site, or category</li>
+          <li>Technicians can review, dismiss, or immediately launch a remote session or automated remediation from the finding card</li>
+          <li>No AI black box — every score is explainable with a clear breakdown of contributing factors</li>
+        </ul>
+      </div>
+      <div class="phase-card phase-2">
+        <span class="phase-tag">Phase 2 · If Validated</span>
+        <h3>Automated Remediations + Trend Alerting</h3>
+        <ul class="phase-bullets">
+          <li>Pre-built remediation scripts triggered automatically on high-confidence findings (e.g. start AV scan, clear temp files, push a missing patch)</li>
+          <li>Trend tracking per endpoint: "this device has been flagged for low disk space 4 times in 30 days"</li>
+          <li>Aggregate fleet health view for IT managers</li>
+          <li>Configurable threshold management for MSPs and power users</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS METRICS -->
+  <div class="section">
+    <div class="section-title">What Success Looks Like</div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon">📊</div>
+        <div>
+          <h4>Adoption</h4>
+          <p>Eligible Resolve customers actively viewing the Proactive Findings feed within 90 days of GA launch</p>
+          <span class="metric-target">≥ 30%</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">🎫</div>
+        <div>
+          <h4>Ticket Deflection</h4>
+          <p>Reduction in performance-related tickets from enrolled endpoints, measured at 6 months post-launch</p>
+          <span class="metric-target">≥ 15% reduction</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div>
+          <h4>Upsell / Expansion Revenue</h4>
+          <p>Incremental ARR driven by tier upgrades attributable to proactive diagnostics capability</p>
+          <span class="metric-target">$X ARR · TBD with Finance</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">🔒</div>
+        <div>
+          <h4>Retention</h4>
+          <p>Net retention delta between customers using proactive diagnostics vs. comparable non-users at 12 months</p>
+          <span class="metric-target">≥ +5pp NRR</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECISIONS NEEDED -->
+  <div class="section">
+    <div class="section-title">What We Need to Decide</div>
+    <div class="decisions-list">
+      <div class="decision-item">
+        <h4>Pricing & Packaging</h4>
+        <p>Is this a premium add-on, a tier differentiator, or included in existing RMM plans? This decision drives the build vs. monetization tradeoff before we scope engineering.</p>
+      </div>
+      <div class="decision-item">
+        <h4>Scoring Model Ownership</h4>
+        <p>Do we define and maintain the health scoring rules internally, or allow customers/partners to configure thresholds? The latter adds complexity but significantly increases stickiness.</p>
+      </div>
+      <div class="decision-item">
+        <h4>Agent Requirements</h4>
+        <p>Does proactive diagnostics require additional agent capabilities, or can we build on the existing RMM agent footprint? Engineering input needed before final scoping.</p>
+      </div>
+      <div class="decision-item">
+        <h4>MSP vs. Internal IT First</h4>
+        <p>Should MVP target MSP technicians managing many endpoints, or internal IT teams managing a single org? The workflow and UX differ meaningfully — getting this wrong affects adoption.</p>
+      </div>
+      <div class="decision-item">
+        <h4>Board Framing</h4>
+        <p>Given this is a direct board ask, how do we frame the update — as a committed roadmap item, or as a pitch seeking Phase 1 investment approval?</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA GAPS -->
+  <div class="gap-banner">
+    <div class="gap-icon">⚠️</div>
+    <div>
+      <h4>Data Gaps — Complete Before Leadership Review</h4>
+      <ul>
+        <li>Tableau: ARR by tier, feature adoption for alerting/monitoring, churn attribution data tagged to "reactive / lack of proactive features"</li>
+        <li>SharePoint / Financial Data: prior analysis on upsell potential for RMM features; quantify the expansion revenue metric above</li>
+        <li>Crayon: updated Nexthink battlecard (pricing, recent feature announcements) and TeamViewer's current proactive monitoring positioning</li>
+        <li>Internal baseline: what % of current support tickets are performance- or security-related? Required to validate the 15% deflection target.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">GoTo Resolve · Proactive Endpoint Diagnostics Pitch · March 2026</div>
+
+</body>
+</html>

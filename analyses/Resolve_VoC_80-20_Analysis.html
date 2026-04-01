@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoTo Resolve — VoC 80/20 Analysis</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3344;
+    --text: #e4e6ed;
+    --text-muted: #8b90a0;
+    --accent: #6c8cff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --orange: #fb923c;
+    --yellow: #fbbf24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.35rem; font-weight: 600; margin: 2.5rem 0 1rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+  p { margin-bottom: 1rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .card-title { font-weight: 600; font-size: 1.05rem; }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-orange { background: rgba(251,146,60,0.15); color: var(--orange); }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-blue { background: rgba(108,140,255,0.15); color: var(--accent); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .metric-value { font-size: 2rem; font-weight: 700; }
+  .metric-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: var(--surface2); }
+  .bar-container { width: 100%; height: 24px; background: var(--surface2); border-radius: 6px; overflow: hidden; display: flex; margin: 0.5rem 0; }
+  .bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; color: white; min-width: 2%; }
+  .quote { border-left: 3px solid var(--accent); padding: 0.75rem 1rem; margin: 0.75rem 0; background: var(--surface2); border-radius: 0 8px 8px 0; font-style: italic; color: var(--text-muted); font-size: 0.9rem; }
+  .source-tag { font-size: 0.7rem; color: var(--text-muted); background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 4px; margin-left: 0.5rem; }
+  .priority-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 700px) { .priority-grid { grid-template-columns: 1fr; } .metric-row { grid-template-columns: 1fr 1fr; } }
+  .tldr { background: linear-gradient(135deg, rgba(108,140,255,0.1), rgba(167,139,250,0.1)); border: 1px solid rgba(108,140,255,0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .action-item { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; align-items: flex-start; }
+  .action-num { background: var(--accent); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .section-sources { font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .theme-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+  .theme-label { width: 160px; font-size: 0.85rem; text-align: right; flex-shrink: 0; }
+  .theme-fill { height: 20px; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.75rem; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>GoTo Resolve — Voice of the Customer 80/20 Analysis</h1>
+<p class="subtitle">April 1, 2026 · Data from JIRA, Salesforce, Slack, Databricks NPS Surveys · Prepared for Resolve PM team</p>
+
+<!-- TL;DR -->
+<div class="tldr">
+  <h3 style="margin-top:0;">TL;DR — The 5 Moves That Cover 80% of the Pain</h3>
+  <p style="margin-bottom:1rem; color: var(--text-muted);">Cross-referencing 100+ JIRA feature requests, 50 deal showstoppers, 50 support cases, 100+ Slack signals, and NPS verbatims — these are the areas where investment yields disproportionate return:</p>
+  <div class="action-item"><div class="action-num">1</div><div><strong>Remote Access & Session Reliability</strong> — #1 support driver, #1 showstopper theme. Connectivity issues, RDP session elevation, multi-monitor bugs, and deployment friction are the single biggest source of daily pain and deal loss. <span class="badge badge-red">Revenue-blocking</span></div></div>
+  <div class="action-item"><div class="action-num">2</div><div><strong>PSA & Ecosystem Integrations</strong> — PSA integration is the top-voted feature request (Blocker, In Progress). HaloPSA, ServiceNow, Salesforce, and Intune integrations are explicitly named in deal showstoppers and customer interviews. <span class="badge badge-red">Revenue-blocking</span></div></div>
+  <div class="action-item"><div class="action-num">3</div><div><strong>Device Management & Patch Maturity</strong> — 24% of feature requests. Dynamic groups, patch policies, maintenance windows, Windows update rollback, 3rd-party app updates. The RMM customers we want to grow into demand this. <span class="badge badge-orange">Growth-enabling</span></div></div>
+  <div class="action-item"><div class="action-num">4</div><div><strong>Mobile/Android Management</strong> — 4 showstoppers blocking BYOD/Google Play deals. Tagged Sales_Top5, CSM_Top5, Support_Top5. Android app management is the single most cross-referenced deal blocker in 2026. <span class="badge badge-red">Revenue-blocking</span></div></div>
+  <div class="action-item"><div class="action-num">5</div><div><strong>Self-Service & Navigation UX</strong> — NPS verbatims scream frustration with downloads, navigation, cancellation flows, and finding the console. These are friction multipliers that amplify every other problem. <span class="badge badge-yellow">Retention</span></div></div>
+</div>
+
+<!-- Key Metrics -->
+<h2>Data Sources & Scale</h2>
+<div class="metric-row">
+  <div class="metric"><div class="metric-value" style="color:var(--accent);">100+</div><div class="metric-label">JIRA Feature Requests<br>(Board 4456)</div></div>
+  <div class="metric"><div class="metric-value" style="color:var(--red);">50</div><div class="metric-label">Deal Showstoppers<br>(Board 4876)</div></div>
+  <div class="metric"><div class="metric-value" style="color:var(--orange);">38</div><div class="metric-label">Blocker-Priority<br>Showstopper Issues</div></div>
+  <div class="metric"><div class="metric-value" style="color:var(--green);">50</div><div class="metric-label">Recent SF Cases<br>(Last 48 hrs)</div></div>
+  <div class="metric"><div class="metric-value" style="color:var(--accent2);">20</div><div class="metric-label">NPS Verbatims<br>(Score 1, Last 6mo)</div></div>
+</div>
+
+<p>Additionally: 100+ Slack messages from #resolve, #salesenablement-support, #resolve-ai-session-notes-feedback, #resolve-helpdesk-feedback, #sweet-spot-customers_wg, #itsg-ai-leaders, and DMs. The "sweet spot" customer analysis shows <strong>~500 accounts (9% of base) = 20% of Resolve revenue (~$4M ARR)</strong> — these are the ones using both sessions AND RMM features.</p>
+
+<!-- THEME 1: Remote Access -->
+<h2>1. Remote Access & Session Reliability</h2>
+<div class="priority-grid">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Why This Is #1</span><span class="badge badge-red">Critical</span></div>
+    <p>Remote access/support is the <strong>dominant theme across every data source</strong>. It's 32% of deal showstoppers (16 of 50), the #1 Salesforce case driver (connectivity, in-session issues, deployment collectively ~24% of cases), and the loudest signal in NPS verbatims.</p>
+    <p>This is also the core tension: Resolve is <em>positioned</em> as UEM/RMM, but the actual customer base is predominantly remote access and remote support — GoToAssist migrants and LogMeIn legacy. These users judge Resolve entirely on session quality.</p>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Specific Pain Points</span></div>
+    <table>
+      <tr><td><strong>RDP session elevation</strong></td><td><span class="badge badge-red">Blocker, Open</span></td></tr>
+      <tr><td><strong>Multi-monitor CPU spikes</strong></td><td><span class="badge badge-red">Showstopper</span></td></tr>
+      <tr><td><strong>Keystroke issues at UAC prompts</strong></td><td><span class="badge badge-green">Fixed</span></td></tr>
+      <tr><td><strong>Special chars in Windows usernames</strong></td><td><span class="badge badge-green">Fixed</span></td></tr>
+      <tr><td><strong>Device-based permissions for support</strong></td><td><span class="badge badge-orange">In Progress</span></td></tr>
+      <tr><td><strong>Multiple profile login on servers</strong></td><td><span class="badge badge-red">Blocker, Open</span></td></tr>
+      <tr><td><strong>Kiosk mode bulk/group assignment</strong></td><td><span class="badge badge-orange">In Progress</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="quote">"The customer is becoming extremely agitated since Resolve is the only remote support tool he has in place and he's been having to drive to his customers the last couple of days" <span class="source-tag">Slack #reactivation</span></div>
+<div class="quote">"Hello Team, a customer evaluating Resolve has been having issues with the speed of Resolve, while checking the firewall rules, he noticed we are hitting turn.console.gotoassist.com — this is not whitelisted" <span class="source-tag">Slack #resolve</span></div>
+<div class="quote">"There is no timeline on when GoToResolve will be added back. Been 4+ months and all you say is early 2026! This is just unacceptable." <span class="source-tag">NPS Score: 1</span></div>
+
+<!-- THEME 2: Integrations -->
+<h2>2. PSA & Ecosystem Integrations</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">Integration Landscape</span><span class="badge badge-red">Revenue-Blocking</span></div>
+  <p>PSA integration is the <strong>top-voted feature request</strong> on Board 4456 (Blocker priority, In Progress). But the integration surface area customers are asking for is broader than PSA alone:</p>
+  <table>
+    <thead><tr><th>Integration</th><th>Source</th><th>Status</th><th>Signal Strength</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PSA (generic / ConnectWise / Autotask)</strong></td><td>JIRA NG-27852</td><td><span class="badge badge-orange">In Progress</span></td><td>Top-voted FR, Blocker</td></tr>
+      <tr><td><strong>HaloPSA</strong></td><td>Slack + JIRA showstoppers</td><td><span class="badge badge-orange">Edge case bug</span></td><td>Trial customers blocked</td></tr>
+      <tr><td><strong>ServiceNow</strong></td><td>Slack #resolve</td><td><span class="badge badge-red">Not available</span></td><td>Enterprise deal (Cognizant/Popeyes)</td></tr>
+      <tr><td><strong>Salesforce (CRM/Ticketing)</strong></td><td>Customer interview (Wolters Kluwer)</td><td><span class="badge badge-red">Not available</span></td><td>38K ARR account requesting</td></tr>
+      <tr><td><strong>Intune</strong></td><td>JIRA NG-28556</td><td><span class="badge badge-red">Open</span></td><td>Feature request</td></tr>
+      <tr><td><strong>3rd-party app management (no creds)</strong></td><td>Slack competitive intel</td><td><span class="badge badge-red">Gap vs ConnectWise</span></td><td>Active $8K deal at risk</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="quote">"I am working an 8k deal for Resolve vs ConnectWise — one of the nice bells on CW is the approval/updating of 3rd party apps with no credentials. Can you help advise how to compete vs this?" <span class="source-tag">Slack #resolve, today</span></div>
+<div class="quote">"Does Resolve support session recordings automatically pushed to ServiceNow tickets instead of manual linking?" — For Cognizant Popeyes <span class="source-tag">Slack #resolve</span></div>
+
+<!-- THEME 3: Device Management & Patch -->
+<h2>3. Device Management & Patch Maturity</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">The RMM Gap</span><span class="badge badge-orange">Growth-Enabling</span></div>
+  <p>24% of feature requests (12 of 50 on Board 4456) are device management asks. This is the gap between where Resolve is positioned (UEM/RMM) and what it actually delivers. The "sweet spot" customers — the 500 accounts generating 20% of revenue — are the ones who use <em>both</em> sessions and RMM. Closing these gaps retains and grows this high-value segment.</p>
+  <table>
+    <thead><tr><th>Feature Gap</th><th>Status</th><th>Context</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Dynamic groups</strong></td><td><span class="badge badge-green">Closed</span></td><td>Was labeled Showstopper, now resolved</td></tr>
+      <tr><td><strong>Windows Update rollback + defer/decline</strong></td><td><span class="badge badge-blue">Ready for Impl.</span></td><td>Blocker, Showstopper-labeled</td></tr>
+      <tr><td><strong>Patching reporting + FreshService + Alerting</strong></td><td><span class="badge badge-orange">In Progress</span></td><td>Blocker, compound request</td></tr>
+      <tr><td><strong>Maintenance windows for patches</strong></td><td><span class="badge badge-red">Open</span></td><td>Feature request</td></tr>
+      <tr><td><strong>Dynamic RMM policies</strong></td><td><span class="badge badge-orange">P0, In Progress</span></td><td>Deal showstopper board</td></tr>
+      <tr><td><strong>Extended software discovery</strong></td><td><span class="badge badge-green">Closed</span></td><td>Was Blocker/Showstopper</td></tr>
+      <tr><td><strong>Hardware inventory parity with Central</strong></td><td><span class="badge badge-red">Gap</span></td><td>Central→Resolve migration blocker</td></tr>
+      <tr><td><strong>Version control (defer agent updates)</strong></td><td><span class="badge badge-red">Not available</span></td><td>Required for enterprise/upmarket</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="quote">"In Central, they had full visibility of RAM slots, disk details, SSD types, serial numbers — in Resolve we cannot extract this data. The client uses these reports for hardware management, and their team is wasting a lot of time running manual commands via terminal." <span class="source-tag">Slack #resolve, Central→Resolve migration</span></div>
+<div class="quote">"Enterprise adjacent companies have specific version acceptance procedures... if the product pushes an update uncontrolled, it can confuse users. Rescue was forced to introduce version control, and I expect Resolve to have to as well — once we start moving upmarket." <span class="source-tag">Slack #resolve, Csaba Jaromi</span></div>
+
+<!-- THEME 4: Mobile/Android -->
+<h2>4. Mobile & Android Management</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">BYOD/MDM Deal Blockers</span><span class="badge badge-red">Revenue-Blocking</span></div>
+  <p>4 deal showstopper issues are specifically about Android/mobile management gaps. The most critical one — Android Managed Google Play automation (PRC-551) — is tagged <strong>Sales_Top5, CSM_Top5, AND Support_Top5</strong>, making it the single most cross-referenced blocker in the system.</p>
+  <table>
+    <thead><tr><th>Issue</th><th>Priority</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Android Managed Google Play automation</strong> (PRC-551)</td><td>Major</td><td><span class="badge badge-orange">In Dev</span></td></tr>
+      <tr><td><strong>Android app installation controls</strong> (PRC-539)</td><td>Major</td><td><span class="badge badge-red">Open</span></td></tr>
+      <tr><td><strong>File management for mobile support</strong></td><td>Blocker</td><td><span class="badge badge-yellow">On Hold</span></td></tr>
+      <tr><td><strong>Kiosk mode for POS terminals</strong></td><td>Feature Request</td><td><span class="badge badge-red">Open</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- THEME 5: UX & Self-Service -->
+<h2>5. Self-Service UX & Navigation Friction</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">NPS Verbatim Themes</span><span class="badge badge-yellow">Retention</span></div>
+  <p>The lowest-scoring NPS verbatims (all Score 1) cluster around a few brutally consistent themes. These aren't feature gaps — they're basic usability failures that create a hostile first impression and amplify every other frustration:</p>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+    <div style="background:var(--surface2); padding:1rem; border-radius:8px;">
+      <strong style="color:var(--red);">Downloads & Updates</strong>
+      <p style="font-size:0.85rem; margin-top:0.5rem;">"Cannot find the new version to update. All links lead me nowhere." / "Convoluted navigation to download an installer that should just be on the DOWNLOAD PAGE." / "Really difficult to find the latest MSI."</p>
+    </div>
+    <div style="background:var(--surface2); padding:1rem; border-radius:8px;">
+      <strong style="color:var(--red);">Account & Cancellation</strong>
+      <p style="font-size:0.85rem; margin-top:0.5rem;">"I am trying to close my account and get nothing but the run around. Go to this website, go to that website. Just put a cancellation button on the settings icon." / "Too much hassle to unenroll."</p>
+    </div>
+    <div style="background:var(--surface2); padding:1rem; border-radius:8px;">
+      <strong style="color:var(--orange);">Console Access</strong>
+      <p style="font-size:0.85rem; margin-top:0.5rem;">"All I want to do is get to the actual console and the website seems to do its best to make it difficult." / "Can't find a phone number or billing info anywhere."</p>
+    </div>
+    <div style="background:var(--surface2); padding:1rem; border-radius:8px;">
+      <strong style="color:var(--orange);">Support & Help</strong>
+      <p style="font-size:0.85rem; margin-top:0.5rem;">"Pages in help are taking over 1 minute just to load." / "Support did not answer after waiting more than an hour." / "I haven't had any support yet why are you asking me this."</p>
+    </div>
+  </div>
+</div>
+
+<!-- Salesforce Support Case Breakdown -->
+<h2>6. Support Case Drivers (Salesforce, Last 48hrs Sample)</h2>
+<div class="card">
+  <p>From a 50-case sample in the last 48 hours, here's where support load concentrates:</p>
+  <div class="theme-bar"><span class="theme-label">Connectivity/Sessions</span><div class="theme-fill" style="width:22%; background:var(--red);">22%</div></div>
+  <div class="theme-bar"><span class="theme-label">Deployment/Install</span><div class="theme-fill" style="width:14%; background:var(--orange);">14%</div></div>
+  <div class="theme-bar"><span class="theme-label">Billing/Cancellation</span><div class="theme-fill" style="width:20%; background:var(--yellow);">20%</div></div>
+  <div class="theme-bar"><span class="theme-label">Helpdesk/Ticketing</span><div class="theme-fill" style="width:8%; background:var(--accent);">8%</div></div>
+  <div class="theme-bar"><span class="theme-label">Integrations</span><div class="theme-fill" style="width:8%; background:var(--accent2);">8%</div></div>
+  <div class="theme-bar"><span class="theme-label">Unattended Access</span><div class="theme-fill" style="width:6%; background:var(--green);">6%</div></div>
+  <div class="theme-bar"><span class="theme-label">Admin/User Mgmt</span><div class="theme-fill" style="width:6%; background:#94a3b8;">6%</div></div>
+  <div class="theme-bar"><span class="theme-label">Remote Execution</span><div class="theme-fill" style="width:4%; background:#94a3b8;">4%</div></div>
+  <div class="theme-bar"><span class="theme-label">Other</span><div class="theme-fill" style="width:12%; background:#475569;">12%</div></div>
+  <p style="margin-top:1rem; font-size:0.85rem; color: var(--text-muted);">Key insight: Connectivity + Deployment = 36% of cases. These are "product works vs. doesn't work" problems, not feature requests. Reducing these directly reduces support load and improves NPS.</p>
+</div>
+
+<!-- Helpdesk & Ticketing -->
+<h2>7. Helpdesk & Ticketing Gaps</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">Table Stakes Gaps</span><span class="badge badge-blue">Quick Wins</span></div>
+  <p>16% of feature requests are helpdesk/ticketing improvements. Most are small UX/workflow refinements — not major features — meaning they're relatively cheap to fix but directly impact daily workflows:</p>
+  <table>
+    <thead><tr><th>Request</th><th>Context</th></tr></thead>
+    <tbody>
+      <tr><td>SLA requirements in tickets</td><td>Blocker, Open (NG-61384)</td></tr>
+      <tr><td>Queue filtering / multi-queue selection</td><td>Feature request</td></tr>
+      <tr><td>Ticket source tracking (portal vs. user-created) in CSV export</td><td>Customer request via Slack</td></tr>
+      <tr><td>Ticket templates (e.g., provisioning checklists)</td><td>Enterprise customer ask</td></tr>
+      <tr><td>AI-assisted ticket responses</td><td>Enterprise customer ask</td></tr>
+      <tr><td>Helpdesk portal load performance (1+ min)</td><td>Support escalation, known bug</td></tr>
+      <tr><td>Saved filters for devices</td><td>Feature request</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Security & Compliance -->
+<h2>8. Security & Compliance</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">Enterprise Readiness</span><span class="badge badge-orange">Upmarket Blocker</span></div>
+  <table>
+    <thead><tr><th>Requirement</th><th>Status</th><th>Context</th></tr></thead>
+    <tbody>
+      <tr><td><strong>US Data Residency</strong></td><td><span class="badge badge-yellow">On Hold</span></td><td>Showstopper, NG-51592</td></tr>
+      <tr><td><strong>Administrator Activity Report</strong></td><td><span class="badge badge-red">Blocker, Open</span></td><td>NG-67188, audit requirement</td></tr>
+      <tr><td><strong>User audit logs</strong></td><td><span class="badge badge-green">Closed</span></td><td>Was Showstopper</td></tr>
+      <tr><td><strong>Smart Card redirection</strong></td><td><span class="badge badge-red">Showstopper</span></td><td>Compliance deal blocker</td></tr>
+      <tr><td><strong>BitLocker management</strong></td><td><span class="badge badge-green">Closed</span></td><td>Was Blocker</td></tr>
+      <tr><td><strong>Resolve flagged as malicious (Kepavll)</strong></td><td><span class="badge badge-yellow">Ongoing</span></td><td>Customer-facing, needs response</td></tr>
+      <tr><td><strong>SCIM provisioning</strong></td><td><span class="badge badge-yellow">Parked</span></td><td>Showstopper board</td></tr>
+      <tr><td><strong>Static IP allowlisting for mail servers</strong></td><td><span class="badge badge-red">Gap</span></td><td>"Large opp will be lost without these"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- AI Monetization Strategic Note -->
+<h2>9. AI Features — Strategic Context</h2>
+<div class="card">
+  <div class="card-header"><span class="card-title">Internal Assessment (from your own Slack)</span></div>
+  <p>Your own analysis from January 2026 captures the state clearly:</p>
+  <div class="quote">"Since joining Resolve again and looking at the AI features and usage/adoption, I have very little faith in this being something that people have a willingness to pay for in its current state."</div>
+  <p>Key data points from customer interviews and internal analysis:</p>
+  <ul style="margin: 0.5rem 0 0.5rem 1.5rem; font-size: 0.9rem;">
+    <li><strong>Session Notes</strong> — Most "used" feature but auto-generated, so true willingness-to-pay is unknown. Wolters Kluwer (38K ARR) gave strong positive feedback: saves up to 1hr/day on KB article creation.</li>
+    <li><strong>Repeat usage is low</strong> — Both adoption volume and repeat usage suggest insufficient value for most users.</li>
+    <li><strong>Resolution Agent / One-Click Resolution</strong> — Was planned for March closed beta; status uncertain. Sales is asking about it.</li>
+    <li><strong>Your proposed framework</strong>: Monetize only action-oriented "Category 3" features (device executions, automations); keep everything else as free substrate to build habit and trust.</li>
+  </ul>
+  <p style="color: var(--text-muted); font-size: 0.85rem;">For the 80/20 analysis: AI features are not currently a VoC pain point — customers aren't complaining about AI. The risk is in <em>premature monetization</em> creating friction before value is proven. The opportunity is in Resolution Agent and proactive diagnostics, which directly tie to the Nexus thesis.</p>
+</div>
+
+<!-- Cross-Reference Matrix -->
+<h2>10. Cross-Source Validation Matrix</h2>
+<div class="card">
+  <p style="margin-bottom:1rem;">Themes that appear in 3+ independent data sources are the highest-confidence bets:</p>
+  <table>
+    <thead><tr><th>Theme</th><th>JIRA FR</th><th>Showstoppers</th><th>SF Cases</th><th>Slack</th><th>NPS</th><th>Score</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Remote Access Reliability</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td><strong style="color:var(--red);">5/5</strong></td></tr>
+      <tr><td><strong>PSA/Integration Ecosystem</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td><strong style="color:var(--red);">4/5</strong></td></tr>
+      <tr><td><strong>Device Mgmt / Patch Maturity</strong></td><td>✓</td><td>✓</td><td></td><td>✓</td><td></td><td><strong style="color:var(--orange);">3/5</strong></td></tr>
+      <tr><td><strong>Mobile/Android</strong></td><td>✓</td><td>✓</td><td></td><td></td><td></td><td><strong style="color:var(--yellow);">2/5</strong></td></tr>
+      <tr><td><strong>Navigation/Download UX</strong></td><td></td><td></td><td>✓</td><td></td><td>✓</td><td><strong style="color:var(--yellow);">2/5</strong></td></tr>
+      <tr><td><strong>Helpdesk/Ticketing</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td><strong style="color:var(--orange);">4/5</strong></td></tr>
+      <tr><td><strong>Security/Compliance</strong></td><td>✓</td><td>✓</td><td></td><td>✓</td><td></td><td><strong style="color:var(--orange);">3/5</strong></td></tr>
+      <tr><td><strong>Central→Resolve Migration Parity</strong></td><td></td><td></td><td></td><td>✓</td><td>✓</td><td><strong style="color:var(--yellow);">2/5</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Recommended Actions -->
+<h2>11. Recommended PM Team Actions</h2>
+<div class="card">
+  <h3>Immediate (This Quarter)</h3>
+  <div class="action-item"><div class="action-num" style="background:var(--red);">A</div><div><strong>Triage the 7 open Blocker/Showstopper issues:</strong> NG-67362 (RDP elevation), NG-67188 (Admin activity report), NG-61384 (SLA in tickets), NG-38718 (Multi-profile login), NG-51917 (Windows Update rollback). Each of these is explicitly blocking a deal or customer commitment.</div></div>
+  <div class="action-item"><div class="action-num" style="background:var(--red);">B</div><div><strong>Fix the download/update UX.</strong> This is an embarrassingly low-hanging fruit. NPS verbatims are scathing. A direct link to MSI downloads from the console and support pages would eliminate multiple Score-1 responses.</div></div>
+  <div class="action-item"><div class="action-num" style="background:var(--orange);">C</div><div><strong>Unblock PSA integration and HaloPSA edge case.</strong> PSA has been In Progress since 2023. HaloPSA has a known device-sync bug blocking trial customers. The $159K Jack Henry deal closed partly on Resolve's unattended capabilities — more deals like this need PSA.</div></div>
+
+  <h3>Next Quarter</h3>
+  <div class="action-item"><div class="action-num" style="background:var(--accent);">D</div><div><strong>Ship Android MGP automation (PRC-551).</strong> It's the only issue tagged Top5 by Sales, CSM, AND Support simultaneously. It's already in dev — make sure it ships.</div></div>
+  <div class="action-item"><div class="action-num" style="background:var(--accent);">E</div><div><strong>Close hardware inventory gap vs. Central.</strong> Central→Resolve migrations are hitting friction. RAM slot details, disk type/serial — these are table stakes for the installed base you're migrating.</div></div>
+  <div class="action-item"><div class="action-num" style="background:var(--accent);">F</div><div><strong>Invest in patch management maturity:</strong> maintenance windows, update rollback (NG-51917, Ready for Impl), and 3rd-party app management. This is what separates a "remote access tool" from a real RMM — and it's what the sweet-spot $4M ARR segment needs.</div></div>
+
+  <h3>Strategic (Aligns with Nexus/Agentic Thesis)</h3>
+  <div class="action-item"><div class="action-num" style="background:var(--accent2);">G</div><div><strong>Use Resolution Agent to address the 63% "needs more info" ticket problem.</strong> The AI ticket analysis showed 63% of tickets need more details before action. If Resolution Agent can automate that follow-up, it's the clearest Category 3 monetizable feature.</div></div>
+  <div class="action-item"><div class="action-num" style="background:var(--accent2);">H</div><div><strong>Build ServiceNow/Salesforce integration as headless execution surface.</strong> Enterprise customers (Cognizant, Wolters Kluwer) are asking for it. Position it as API-first — this becomes the first "other systems invoking Resolve programmatically" use case that validates the headless execution engine thesis.</div></div>
+</div>
+
+<!-- Footer -->
+<div style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.8rem;">
+  <p><strong>Sources:</strong> JIRA Feature Request Board (rapidView=4456) · JIRA Sales Deal Showstopper Board (rapidView=4876) · JIRA Showstopper-labeled issues (project=NG) · Salesforce Cases (SOQL, last 48hrs) · Slack channels (#resolve, #salesenablement-support, #resolve-ai-session-notes-feedback, #resolve-helpdesk-feedback, #sweet-spot-customers_wg, #itsg-ai-leaders) · Databricks NPS/OSAT Verbatims (Digital Support - Surveys Genie) · Customer interview: Wolters Kluwer Italia (38K ARR)</p>
+  <p style="margin-top:0.5rem;">Generated April 1, 2026. Data reflects live state at time of query — not a cached snapshot.</p>
+</div>
+
+</body>
+</html>

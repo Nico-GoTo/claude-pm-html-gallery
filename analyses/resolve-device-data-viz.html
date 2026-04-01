@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resolve Device Data — Pipeline Architecture</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --blue: #58a6ff;
+    --blue-dim: #1f6feb;
+    --blue-glow: rgba(88,166,255,0.15);
+    --green: #3fb950;
+    --green-dim: #238636;
+    --green-glow: rgba(63,185,80,0.15);
+    --purple: #bc8cff;
+    --purple-dim: #6e40c9;
+    --purple-glow: rgba(188,140,255,0.15);
+    --orange: #f0883e;
+    --orange-dim: #bd561d;
+    --orange-glow: rgba(240,136,62,0.15);
+    --teal: #39d0d8;
+    --teal-dim: #1b7c81;
+    --teal-glow: rgba(57,208,216,0.15);
+    --red: #f85149;
+    --yellow: #e3b341;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(180deg, rgba(88,166,255,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 60px 32px;
+  }
+  .header-inner { max-width: 1400px; margin: 0 auto; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 11px;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 16px;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  h1 { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  h1 span { color: var(--blue); }
+  .subtitle { color: var(--text-muted); font-size: 15px; max-width: 680px; }
+  .stats-row { display: flex; gap: 32px; margin-top: 28px; }
+  .stat { display: flex; flex-direction: column; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--blue); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); }
+
+  /* ─── MAIN LAYOUT ─── */
+  main { max-width: 1400px; margin: 0 auto; padding: 48px 60px; }
+
+  section { margin-bottom: 64px; }
+  .section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--text-dim); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── PIPELINE FLOW ─── */
+  .pipeline {
+    display: flex; align-items: stretch; gap: 0;
+    overflow-x: auto; padding-bottom: 8px;
+  }
+
+  .stage {
+    flex: 1; min-width: 180px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+
+  .stage:not(:last-child)::after {
+    content: '';
+    position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 14px solid var(--bg);
+    z-index: 10;
+  }
+
+  .arrow-line {
+    position: absolute; right: -24px; top: 50%;
+    transform: translateY(-50%);
+    width: 48px; height: 2px;
+    background: linear-gradient(90deg, var(--border), var(--blue-dim));
+    z-index: 5;
+  }
+  .arrow-line::after {
+    content: '▶'; position: absolute; right: -8px; top: -8px;
+    color: var(--blue-dim); font-size: 12px;
+  }
+
+  .stage-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 16px;
+    width: 100%; cursor: default; position: relative; overflow: hidden;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+  }
+  .stage-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .stage-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .stage-card.device::before { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+  .stage-card.device { border-color: rgba(88,166,255,.3); }
+  .stage-card.device:hover { border-color: var(--blue); box-shadow: 0 8px 32px var(--blue-glow); }
+
+  .stage-card.stream::before { background: var(--orange); box-shadow: 0 0 12px var(--orange); }
+  .stage-card.stream { border-color: rgba(240,136,62,.3); }
+  .stage-card.stream:hover { border-color: var(--orange); box-shadow: 0 8px 32px var(--orange-glow); }
+
+  .stage-card.lambda::before { background: var(--purple); box-shadow: 0 0 12px var(--purple); }
+  .stage-card.lambda { border-color: rgba(188,140,255,.3); }
+  .stage-card.lambda:hover { border-color: var(--purple); box-shadow: 0 8px 32px var(--purple-glow); }
+
+  .stage-card.storage::before { background: var(--teal); box-shadow: 0 0 12px var(--teal); }
+  .stage-card.storage { border-color: rgba(57,208,216,.3); }
+  .stage-card.storage:hover { border-color: var(--teal); box-shadow: 0 8px 32px var(--teal-glow); }
+
+  .stage-card.api::before { background: var(--green); box-shadow: 0 0 12px var(--green); }
+  .stage-card.api { border-color: rgba(63,185,80,.3); }
+  .stage-card.api:hover { border-color: var(--green); box-shadow: 0 8px 32px var(--green-glow); }
+
+  .stage-icon { font-size: 28px; margin-bottom: 10px; }
+  .stage-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .stage-tech { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+  .stage-details { display: flex; flex-direction: column; gap: 4px; }
+  .detail-item {
+    font-size: 11px; color: var(--text-muted);
+    background: var(--bg3); border-radius: 4px; padding: 3px 8px;
+  }
+
+  .connector {
+    display: flex; align-items: center; flex-shrink: 0;
+    padding: 0 4px; position: relative; z-index: 1;
+  }
+  .connector-line {
+    width: 40px; height: 2px;
+    background: linear-gradient(90deg, var(--border), rgba(88,166,255,.4), var(--border));
+    position: relative;
+  }
+  .connector-arrow {
+    color: var(--blue-dim); font-size: 14px; flex-shrink: 0;
+  }
+  .connector-label {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: var(--text-dim); white-space: nowrap;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+
+  /* ─── DATA SCHEMA GRID ─── */
+  .schema-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;
+  }
+
+  .schema-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    cursor: default;
+  }
+  .schema-card:hover { transform: translateY(-2px); }
+
+  .schema-header {
+    padding: 14px 16px 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .schema-icon { font-size: 20px; }
+  .schema-info { flex: 1; }
+  .schema-name { font-size: 13px; font-weight: 600; }
+  .schema-source { font-size: 11px; color: var(--text-muted); }
+
+  .schema-fields {
+    padding: 0 16px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .field {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; padding: 4px 8px; border-radius: 4px;
+    background: var(--bg3);
+  }
+  .field-name { color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; }
+  .field-type {
+    font-size: 10px; padding: 1px 6px; border-radius: 10px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .type-num { background: rgba(88,166,255,.15); color: var(--blue); }
+  .type-str { background: rgba(63,185,80,.15); color: var(--green); }
+  .type-arr { background: rgba(188,140,255,.15); color: var(--purple); }
+  .type-bool { background: rgba(240,136,62,.15); color: var(--orange); }
+  .type-obj { background: rgba(57,208,216,.15); color: var(--teal); }
+
+  .schema-card.cpu .schema-header { background: rgba(88,166,255,.07); border-bottom: 1px solid rgba(88,166,255,.15); }
+  .schema-card.cpu:hover { border-color: rgba(88,166,255,.5); box-shadow: 0 4px 20px var(--blue-glow); }
+  .schema-card.memory .schema-header { background: rgba(63,185,80,.07); border-bottom: 1px solid rgba(63,185,80,.15); }
+  .schema-card.memory:hover { border-color: rgba(63,185,80,.5); box-shadow: 0 4px 20px var(--green-glow); }
+  .schema-card.disk .schema-header { background: rgba(188,140,255,.07); border-bottom: 1px solid rgba(188,140,255,.15); }
+  .schema-card.disk:hover { border-color: rgba(188,140,255,.5); box-shadow: 0 4px 20px var(--purple-glow); }
+  .schema-card.network .schema-header { background: rgba(240,136,62,.07); border-bottom: 1px solid rgba(240,136,62,.15); }
+  .schema-card.network:hover { border-color: rgba(240,136,62,.5); box-shadow: 0 4px 20px var(--orange-glow); }
+  .schema-card.process .schema-header { background: rgba(57,208,216,.07); border-bottom: 1px solid rgba(57,208,216,.15); }
+  .schema-card.process:hover { border-color: rgba(57,208,216,.5); box-shadow: 0 4px 20px var(--teal-glow); }
+  .schema-card.software .schema-header { background: rgba(227,179,65,.07); border-bottom: 1px solid rgba(227,179,65,.15); }
+  .schema-card.software:hover { border-color: rgba(227,179,65,.5); box-shadow: 0 4px 20px rgba(227,179,65,.15); }
+  .schema-card.eventlog .schema-header { background: rgba(248,81,73,.07); border-bottom: 1px solid rgba(248,81,73,.15); }
+  .schema-card.eventlog:hover { border-color: rgba(248,81,73,.5); box-shadow: 0 4px 20px rgba(248,81,73,.15); }
+  .schema-card.host .schema-header { background: rgba(188,140,255,.07); border-bottom: 1px solid rgba(188,140,255,.15); }
+  .schema-card.host:hover { border-color: rgba(188,140,255,.5); box-shadow: 0 4px 20px var(--purple-glow); }
+
+  /* ─── LAMBDA DETAIL ─── */
+  .lambda-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .lambda-grid { grid-template-columns: 1fr; } }
+
+  .lambda-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    cursor: default;
+  }
+  .lambda-card:hover { transform: translateY(-2px); border-color: rgba(188,140,255,.4); box-shadow: 0 8px 32px var(--purple-glow); }
+
+  .lambda-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .lambda-icon-wrap {
+    width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+    background: rgba(188,140,255,.1); border: 1px solid rgba(188,140,255,.2);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .lambda-title { font-size: 14px; font-weight: 600; }
+  .lambda-trigger { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .lambda-body { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.7; }
+
+  .lambda-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 10.5px; padding: 2px 8px; border-radius: 20px;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted);
+  }
+  .tag.perf { border-color: rgba(240,136,62,.3); color: var(--orange); background: rgba(240,136,62,.07); }
+  .tag.api { border-color: rgba(63,185,80,.3); color: var(--green); background: rgba(63,185,80,.07); }
+  .tag.security { border-color: rgba(88,166,255,.3); color: var(--blue); background: rgba(88,166,255,.07); }
+  .tag.routing { border-color: rgba(188,140,255,.3); color: var(--purple); background: rgba(188,140,255,.07); }
+
+  /* ─── OPPORTUNITY CARDS ─── */
+  .opp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 1100px) { .opp-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 700px) { .opp-grid { grid-template-columns: 1fr; } }
+
+  .opp-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 22px; position: relative; overflow: hidden;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    cursor: default;
+  }
+  .opp-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; bottom: 0; border-radius: 12px 0 0 12px;
+  }
+  .opp-card.high::before { background: var(--green); }
+  .opp-card.med::before { background: var(--yellow); }
+  .opp-card.infra::before { background: var(--blue); }
+  .opp-card:hover { transform: translateY(-2px); }
+  .opp-card.high:hover { border-color: rgba(63,185,80,.4); box-shadow: 0 6px 24px var(--green-glow); }
+  .opp-card.med:hover { border-color: rgba(227,179,65,.4); box-shadow: 0 6px 24px rgba(227,179,65,.12); }
+  .opp-card.infra:hover { border-color: rgba(88,166,255,.4); box-shadow: 0 6px 24px var(--blue-glow); }
+
+  .opp-priority {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em;
+    font-weight: 600; margin-bottom: 10px;
+  }
+  .opp-card.high .opp-priority { color: var(--green); }
+  .opp-card.med .opp-priority { color: var(--yellow); }
+  .opp-card.infra .opp-priority { color: var(--blue); }
+
+  .opp-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .opp-body { font-size: 12.5px; color: var(--text-muted); line-height: 1.7; margin-bottom: 12px; }
+  .opp-connection { font-size: 11.5px; color: var(--text-dim); font-style: italic; }
+
+  /* ─── FLOW DETAIL ─── */
+  .flow-steps {
+    display: flex; flex-direction: column; gap: 0;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  }
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 20px;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    transition: background .15s;
+    cursor: default;
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-step:hover { background: var(--bg3); }
+
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--blue); flex-shrink: 0; margin-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .step-desc { font-size: 12px; color: var(--text-muted); }
+  .step-meta {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 6px; font-size: 10.5px; color: var(--text-dim);
+  }
+  .step-meta code {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px; font-family: 'SF Mono','Fira Code',monospace;
+    font-size: 10px; color: var(--text-muted);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 60px; max-width: none;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--text-dim);
+  }
+  footer .footer-inner { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    header, main { padding-left: 24px; padding-right: 24px; }
+    .pipeline { flex-direction: column; }
+    .connector { transform: rotate(90deg); padding: 4px 0; height: 40px; justify-content: center; }
+    .stage { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="badge"><span class="badge-dot"></span>GoTo Resolve · Device Data Pipeline</div>
+    <h1>resolve-device-data <span>Architecture</span></h1>
+    <p class="subtitle">End-to-end telemetry pipeline: from endpoint agents collecting raw system data to cloud-processed, queryable device intelligence at scale.</p>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-val">~250K</span><span class="stat-lbl">Concurrent devices</span></div>
+      <div class="stat"><span class="stat-val">4,160/s</span><span class="stat-lbl">Records processed</span></div>
+      <div class="stat"><span class="stat-val">4</span><span class="stat-lbl">Lambda functions</span></div>
+      <div class="stat"><span class="stat-val">10+</span><span class="stat-lbl">Data signal types</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── PIPELINE FLOW ── -->
+  <section>
+    <div class="section-title">End-to-End Data Flow</div>
+    <div class="pipeline">
+
+      <div class="stage">
+        <div class="stage-card device">
+          <div class="stage-icon">🖥️</div>
+          <div class="stage-name">Managed Endpoint</div>
+          <div class="stage-tech">GoTo Resolve Agent + DDM</div>
+          <div class="stage-details">
+            <div class="detail-item">Device Data Module (Go)</div>
+            <div class="detail-item">Windows &amp; Linux</div>
+            <div class="detail-item">gopsutil v4 collection</div>
+            <div class="detail-item">IPC command handling</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">
+        <div class="connector-line"><span class="connector-label">JWT Auth</span></div>
+        <div class="connector-arrow">▶</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-card lambda">
+          <div class="stage-icon">🔐</div>
+          <div class="stage-name">Config Lambda</div>
+          <div class="stage-tech">AWS Lambda · Go</div>
+          <div class="stage-details">
+            <div class="detail-item">JWT token validation</div>
+            <div class="detail-item">STS temp credentials</div>
+            <div class="detail-item">Company ID gating</div>
+            <div class="detail-item">Per-env config</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">
+        <div class="connector-line"><span class="connector-label">Kinesis + Zstd</span></div>
+        <div class="connector-arrow">▶</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-card stream">
+          <div class="stage-icon">⚡</div>
+          <div class="stage-name">Kinesis Stream</div>
+          <div class="stage-tech">AWS Kinesis · FlatBuffers</div>
+          <div class="stage-details">
+            <div class="detail-item">Binary FlatBuffer envelope</div>
+            <div class="detail-item">Zstd compression</div>
+            <div class="detail-item">Schema URL routing header</div>
+            <div class="detail-item">Partition key sharding</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">
+        <div class="connector-line"><span class="connector-label">Route by schema</span></div>
+        <div class="connector-arrow">▶</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-card lambda">
+          <div class="stage-icon">🔀</div>
+          <div class="stage-name">Demux Lambda</div>
+          <div class="stage-tech">AWS Lambda · Go</div>
+          <div class="stage-details">
+            <div class="detail-item">Routes by schema URL</div>
+            <div class="detail-item">Batches to sub-streams</div>
+            <div class="detail-item">500-rec / 5MB batches</div>
+            <div class="detail-item">Pre-alloc, zero-GC design</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">
+        <div class="connector-line"><span class="connector-label">Decompress</span></div>
+        <div class="connector-arrow">▶</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-card storage">
+          <div class="stage-icon">🗄️</div>
+          <div class="stage-name">Storage Layer</div>
+          <div class="stage-tech">DynamoDB + S3</div>
+          <div class="stage-details">
+            <div class="detail-item">DynamoDB (software data)</div>
+            <div class="detail-item">S3 (raw metrics + logs)</div>
+            <div class="detail-item">Decompression Lambda</div>
+            <div class="detail-item">Error bucket routing</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">
+        <div class="connector-line"><span class="connector-label">REST Query</span></div>
+        <div class="connector-arrow">▶</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-card api">
+          <div class="stage-icon">🌐</div>
+          <div class="stage-name">Software Lambda</div>
+          <div class="stage-tech">REST API · Gin · Go</div>
+          <div class="stage-details">
+            <div class="detail-item">GET /devices/{company_id}</div>
+            <div class="detail-item">GET /devices/{cid}/{did}</div>
+            <div class="detail-item">Pagination support</div>
+            <div class="detail-item">Usage history (day/week/mo)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── DETAILED FLOW STEPS ── -->
+  <section>
+    <div class="section-title">Step-by-Step Execution</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">DDM authenticates with Config Lambda</div>
+          <div class="step-desc">On startup, the Device Data Module reads a device token from the filesystem and sends a JWT-authenticated request. The Config Lambda validates the token, checks the company ID against an environment allowlist, and returns short-lived AWS STS credentials.</div>
+          <div class="step-meta"><code>GET /device/config</code> · Bearer token · Returns AccessKeyId, SecretAccessKey, SessionToken</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Collectors scrape system metrics on configurable intervals</div>
+          <div class="step-desc">The Scrape Manager runs SampleCollectors (CPU, memory, disk, network, processes, battery, temperatures, host info) and EventCollectors (Windows Event Logs). Metrics are gathered into per-epoch batches via Aggregators. The FSM-based main loop manages timing and retry logic.</div>
+          <div class="step-meta"><code>gopsutil/v4</code> · FSM config state · Configurable scrape intervals</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Data is compressed and serialized into FlatBuffer containers</div>
+          <div class="step-desc">Collected metrics are serialized to JSON, Zstd-compressed, then wrapped in a FlatBuffers container envelope with metadata: schema URL (used for routing), partition key, company/device IDs, and compression flags.</div>
+          <div class="step-meta"><code>FlatBuffers</code> · Zstd compression · Schema URL header for routing</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Ingestion client sends batched records to Kinesis</div>
+          <div class="step-desc">The Ingestion package uses the STS credentials from step 1 to authenticate with Kinesis and send batched PutRecords requests. The stream operates at ~4,160 records/sec across all 250K managed devices.</div>
+          <div class="step-meta"><code>aws-sdk-go-v2</code> · STS temp creds · PutRecords API</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Demux Lambda routes records to type-specific downstream streams</div>
+          <div class="step-desc">The Demux Lambda reads each record's schema URL header and routes it to the appropriate destination Kinesis stream (metrics stream, event logs stream, software stream, etc.). Pre-allocated slices minimize heap allocations for throughput. Batches respect the 500-record / 5MB PutRecords API limits.</div>
+          <div class="step-meta">Pre-alloc design · 500 rec / 5MB batches · Per-schema fan-out</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Decompression Lambda processes Firehose records to S3 / DynamoDB</div>
+          <div class="step-desc">Kinesis Firehose triggers the Decompression Lambda which validates payload sizes (1MB decompressed / 6MB Lambda limit), Zstd-decompresses records, and forwards to S3 buckets or error buckets. Software usage data is persisted to DynamoDB for querying.</div>
+          <div class="step-meta">1,000 records/invocation · 1MB decompressed limit · Error bucket routing</div>
+        </div>
+      </div>
+      <div class="flow-step" style="border-bottom:none">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-title">Software Lambda serves REST queries over stored data</div>
+          <div class="step-desc">The only currently exposed query surface: a Gin-based REST API that reads software inventory and usage history from DynamoDB. Returns installed software per device or company with daily, weekly, and monthly usage breakdowns and cursor-based pagination.</div>
+          <div class="step-meta"><code>GET /devices/{company_id}/{device_id}</code> · Paginated · Usage: last_days, last_weeks, last_months</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DATA SCHEMA ── -->
+  <section>
+    <div class="section-title">Data Signals — What's Collected from Every Device</div>
+    <div class="schema-grid">
+
+      <div class="schema-card cpu">
+        <div class="schema-header">
+          <div class="schema-icon">⚙️</div>
+          <div class="schema-info">
+            <div class="schema-name">CPU Usage</div>
+            <div class="schema-source">gopsutil · per-core</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">cpu_usage</span><span class="field-type type-arr">float[]</span></div>
+          <div class="field"><span class="field-name">timestamp</span><span class="field-type type-str">ISO 8601</span></div>
+          <div class="field"><span class="field-name">epoch_id</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">company_id</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">device_id</span><span class="field-type type-str">string</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card memory">
+        <div class="schema-header">
+          <div class="schema-icon">🧠</div>
+          <div class="schema-info">
+            <div class="schema-name">Memory Info</div>
+            <div class="schema-source">gopsutil · system RAM</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">total</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">available</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">used</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">free</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">used_percent</span><span class="field-type type-num">float64</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card disk">
+        <div class="schema-header">
+          <div class="schema-icon">💾</div>
+          <div class="schema-info">
+            <div class="schema-name">Disk Usage</div>
+            <div class="schema-source">gopsutil · per-volume</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">total</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">used</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">free</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">volumes</span><span class="field-type type-arr">object[]</span></div>
+          <div class="field"><span class="field-name">mount_point</span><span class="field-type type-str">string</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card network">
+        <div class="schema-header">
+          <div class="schema-icon">🌐</div>
+          <div class="schema-info">
+            <div class="schema-name">Network Interfaces</div>
+            <div class="schema-source">gopsutil · per-interface</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">bytes_sent</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">bytes_recv</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">packets_sent</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">packets_recv</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">errin / errout</span><span class="field-type type-num">uint64</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card process">
+        <div class="schema-header">
+          <div class="schema-icon">⚡</div>
+          <div class="schema-info">
+            <div class="schema-name">Running Processes</div>
+            <div class="schema-source">gopsutil · per-process</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">name</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">executable_path</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">uptime</span><span class="field-type type-num">int64</span></div>
+          <div class="field"><span class="field-name">cpu_percent</span><span class="field-type type-num">float64</span></div>
+          <div class="field"><span class="field-name">mem_percent</span><span class="field-type type-num">float64</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card software">
+        <div class="schema-header">
+          <div class="schema-icon">📦</div>
+          <div class="schema-info">
+            <div class="schema-name">Installed Software</div>
+            <div class="schema-source">Registry / package mgr</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">software_name</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">version</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">publisher</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">install_date</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">last_days/weeks/months</span><span class="field-type type-arr">bool[]</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card eventlog">
+        <div class="schema-header">
+          <div class="schema-icon">📋</div>
+          <div class="schema-info">
+            <div class="schema-name">Windows Event Logs</div>
+            <div class="schema-source">Windows Event Viewer · Win only</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">event_id</span><span class="field-type type-num">uint16</span></div>
+          <div class="field"><span class="field-name">level</span><span class="field-type type-num">uint8</span></div>
+          <div class="field"><span class="field-name">provider</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">event_data</span><span class="field-type type-arr">kv[]</span></div>
+          <div class="field"><span class="field-name">rendering_info</span><span class="field-type type-obj">object</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card host">
+        <div class="schema-header">
+          <div class="schema-icon">🖥️</div>
+          <div class="schema-info">
+            <div class="schema-name">Host Info</div>
+            <div class="schema-source">OS · gopsutil</div>
+          </div>
+        </div>
+        <div class="schema-fields">
+          <div class="field"><span class="field-name">hostname</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">uptime</span><span class="field-type type-num">uint64</span></div>
+          <div class="field"><span class="field-name">os</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">platform</span><span class="field-type type-str">string</span></div>
+          <div class="field"><span class="field-name">temperatures</span><span class="field-type type-arr">sensor[]</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── LAMBDA DETAIL ── -->
+  <section>
+    <div class="section-title">Lambda Functions</div>
+    <div class="lambda-grid">
+
+      <div class="lambda-card">
+        <div class="lambda-header">
+          <div class="lambda-icon-wrap">🔐</div>
+          <div>
+            <div class="lambda-title">Config Lambda</div>
+            <div class="lambda-trigger">Triggered by: DDM startup · HTTP GET</div>
+          </div>
+        </div>
+        <div class="lambda-body">
+          Entry point for all device authentication. Validates JWT device tokens, checks company ID against the per-environment allowlist, and issues short-lived AWS STS credentials. These credentials are scoped to Kinesis PutRecords only — devices never get broader AWS access.
+        </div>
+        <div class="lambda-tags">
+          <span class="tag security">JWT Validation</span>
+          <span class="tag security">STS Credentials</span>
+          <span class="tag">Company Gating</span>
+          <span class="tag">Multi-env</span>
+        </div>
+      </div>
+
+      <div class="lambda-card">
+        <div class="lambda-header">
+          <div class="lambda-icon-wrap">🔀</div>
+          <div>
+            <div class="lambda-title">Demux Lambda</div>
+            <div class="lambda-trigger">Triggered by: Kinesis stream · event batch</div>
+          </div>
+        </div>
+        <div class="lambda-body">
+          High-throughput router processing ~4,160 records/sec from 250K devices. Reads each FlatBuffer record's schema URL header to determine the destination stream. Pre-allocated static slices eliminate heap allocations. Respects PutRecords limits (500 records, 5MB) and fans out to per-schema downstream streams.
+        </div>
+        <div class="lambda-tags">
+          <span class="tag perf">Zero-alloc design</span>
+          <span class="tag routing">Schema routing</span>
+          <span class="tag perf">4,160 rec/s</span>
+          <span class="tag">Batch aware</span>
+        </div>
+      </div>
+
+      <div class="lambda-card">
+        <div class="lambda-header">
+          <div class="lambda-icon-wrap">📦</div>
+          <div>
+            <div class="lambda-title">Decompression Lambda</div>
+            <div class="lambda-trigger">Triggered by: Kinesis Firehose · batch</div>
+          </div>
+        </div>
+        <div class="lambda-body">
+          Handles the Firehose → S3 path. Validates that each record is within size limits (1MB decompressed, 6MB Lambda payload), Zstd-decompresses the payload, and forwards to the appropriate S3 bucket. Records that fail validation route to a dedicated error bucket for inspection.
+        </div>
+        <div class="lambda-tags">
+          <span class="tag">Zstd decompress</span>
+          <span class="tag">1,000 rec/invocation</span>
+          <span class="tag">Size validation</span>
+          <span class="tag">Error routing</span>
+        </div>
+      </div>
+
+      <div class="lambda-card">
+        <div class="lambda-header">
+          <div class="lambda-icon-wrap">🌐</div>
+          <div>
+            <div class="lambda-title">Software Lambda</div>
+            <div class="lambda-trigger">Triggered by: REST API · HTTP GET</div>
+          </div>
+        </div>
+        <div class="lambda-body">
+          The only currently exposed query API. Gin-based REST service reading software inventory and usage history from DynamoDB. Supports company-level and device-level queries with cursor-based pagination. Returns installed software alongside daily, weekly, and monthly usage history booleans.
+        </div>
+        <div class="lambda-tags">
+          <span class="tag api">REST · Gin</span>
+          <span class="tag api">DynamoDB</span>
+          <span class="tag">Pagination</span>
+          <span class="tag">Usage history</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── OPPORTUNITIES ── -->
+  <section>
+    <div class="section-title">Strategic Opportunities</div>
+    <div class="opp-grid">
+
+      <div class="opp-card high">
+        <div class="opp-priority">🟢 High Impact</div>
+        <div class="opp-title">Agentic IT Sensing Layer</div>
+        <div class="opp-body">The pipeline is already collecting the right signals — CPU spikes, process anomalies, event log patterns — for an agentic system to reason over. The missing piece is a query/inference layer that lets an AI agent consume this stream and take action. The infrastructure is ahead of the product.</div>
+        <div class="opp-connection">→ Directly enables the headless execution engine thesis</div>
+      </div>
+
+      <div class="opp-card high">
+        <div class="opp-priority">🟢 High Impact</div>
+        <div class="opp-title">Windows Event Log Intelligence</div>
+        <div class="opp-body">Event logs (failed logins, service crashes, policy changes, security events) are being collected but not surfaced as product value. Pattern detection on event IDs is a high-signal AI use case that would differentiate Resolve from simpler RMM tools — and the data is already flowing in.</div>
+        <div class="opp-connection">→ Security positioning, alert generation, anomaly detection</div>
+      </div>
+
+      <div class="opp-card high">
+        <div class="opp-priority">🟢 High Impact</div>
+        <div class="opp-title">Software Usage for License Reclamation</div>
+        <div class="opp-body">Last-used timestamps with daily/weekly/monthly granularity are already stored in DynamoDB and queryable via API. This is directly actionable for SMB IT admins managing SaaS licenses. It's built — the question is whether it's surfaced meaningfully in the Resolve UI.</div>
+        <div class="opp-connection">→ Near-term product value with zero new collection work</div>
+      </div>
+
+      <div class="opp-card med">
+        <div class="opp-priority">🟡 Medium-term</div>
+        <div class="opp-title">Nexus: Real-Time Device Context</div>
+        <div class="opp-body">For the Nexus vision (technician as supervisor, AI as executor), this telemetry stream is the live context that agents would consume. A technician opening a device view could have an AI agent pre-analyzing process behavior, memory pressure, and recent errors before they even ask.</div>
+        <div class="opp-connection">→ Core input layer for Nexus agent orchestration</div>
+      </div>
+
+      <div class="opp-card med">
+        <div class="opp-priority">🟡 Medium-term</div>
+        <div class="opp-title">Process-Level Anomaly Detection</div>
+        <div class="opp-body">Per-process CPU/memory percentages and uptime are collected continuously. Baselining "normal" process behavior per device type and alerting on deviations is a natural AI feature — especially valuable for detecting ransomware precursors or rogue processes before they become incidents.</div>
+        <div class="opp-connection">→ Proactive IT vs. reactive support — UEM differentiation</div>
+      </div>
+
+      <div class="opp-card infra">
+        <div class="opp-priority">🔵 Infrastructure Gap</div>
+        <div class="opp-title">Query Surface is Severely Limited</div>
+        <div class="opp-body">Only software data is queryable today. CPU, memory, disk, network, processes, host info, and event logs all flow to S3/storage with no API on top. Any product or AI feature using this data requires building a query layer first — this is the foundational blocker for most opportunities above.</div>
+        <div class="opp-connection">→ Prerequisite for nearly all agentic and observability features</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>resolve-device-data · GoTo Resolve · Architecture Overview</span>
+    <span>Generated March 2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Industry News Digest — Week of March 30, 2026</title>
+<style>
+  :root {
+    --accent: #00B388;
+    --accent-dark: #009973;
+    --accent-light: #e6f9f4;
+    --bg: #fafbfc;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #555770;
+    --border: #e2e5ea;
+    --so-what-bg: #f0faf7;
+    --so-what-border: #00B388;
+    --top-story-accent: #0066FF;
+    --top-story-bg: #f0f5ff;
+    --red-accent: #e74c3c;
+    --red-bg: #fdf0ef;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #00B388 0%, #0066FF 100%);
+    color: white;
+    padding: 48px 0 40px;
+    margin-bottom: 0;
+  }
+
+  header .container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: fit-content;
+    backdrop-filter: blur(4px);
+  }
+
+  .header-badge .dot {
+    width: 7px;
+    height: 7px;
+    background: #7fffdb;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 8px 0 4px;
+  }
+
+  header .subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+
+  header .meta {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 4px;
+  }
+
+  /* Sticky Nav */
+  nav {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  nav .container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  nav a:hover {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+  }
+
+  /* Sections */
+  .section {
+    margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    transition: box-shadow 0.2s;
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .card.top-story {
+    border-left: 4px solid var(--top-story-accent);
+  }
+
+  .card.security {
+    border-left: 4px solid var(--red-accent);
+  }
+
+  .card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+  }
+
+  .card p {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    font-size: 14.5px;
+  }
+
+  .card .source {
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    margin-bottom: 12px;
+  }
+
+  .card .source a {
+    color: var(--accent-dark);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .card .source a:hover {
+    text-decoration: underline;
+  }
+
+  /* So What callout */
+  .so-what {
+    background: var(--so-what-bg);
+    border-left: 3px solid var(--so-what-border);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .so-what strong {
+    color: var(--accent-dark);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Strategic Implications */
+  .strategic {
+    background: linear-gradient(135deg, #f8f9fb 0%, #f0faf7 100%);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 32px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .strategic h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
+  }
+
+  .strategic-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(0,179,136,0.15);
+  }
+
+  .strategic-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .strategic-item h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin-bottom: 8px;
+  }
+
+  .strategic-item p {
+    font-size: 14.5px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .strategic-item p strong {
+    color: var(--text);
+  }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+
+  .tag.top { background: var(--top-story-bg); color: var(--top-story-accent); }
+  .tag.competitor { background: #fff3e0; color: #e67e22; }
+  .tag.ai { background: #f3e5f5; color: #8e24aa; }
+  .tag.msp { background: #e8f5e9; color: #2e7d32; }
+  .tag.security { background: var(--red-bg); color: var(--red-accent); }
+  .tag.market { background: #e3f2fd; color: #1565c0; }
+  .tag.reddit { background: #fff3e0; color: #ff5722; }
+
+  /* Footer */
+  footer {
+    margin-top: 40px;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  footer h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  footer ul {
+    list-style: none;
+    columns: 2;
+    column-gap: 24px;
+  }
+
+  footer li {
+    margin-bottom: 6px;
+    break-inside: avoid;
+  }
+
+  footer a {
+    color: var(--accent-dark);
+    text-decoration: none;
+    font-size: 12.5px;
+  }
+
+  footer a:hover { text-decoration: underline; }
+
+  .footer-note {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+  }
+
+  /* Print */
+  @media print {
+    nav { position: static; box-shadow: none; }
+    .card:hover { box-shadow: none; }
+    header { break-after: avoid; }
+    .card { break-inside: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    header h1 { font-size: 24px; }
+    .container { padding: 0 16px; }
+    footer ul { columns: 1; }
+    nav a { font-size: 11.5px; padding: 4px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-badge"><span class="dot"></span> Weekly Intelligence Brief</div>
+    <h1>IT Industry News Digest</h1>
+    <div class="subtitle">Week of March 30, 2026</div>
+    <div class="meta">Coverage: March 23–30, 2026 &middot; Prepared for Nico Sauter, Director of Product Management, GoTo</div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <a href="#top-stories">Top Stories</a>
+    <a href="#competitor-moves">Competitor Moves</a>
+    <a href="#ai-agentic">AI &amp; Agentic IT</a>
+    <a href="#msp-channel">MSP &amp; Channel</a>
+    <a href="#security">Security</a>
+    <a href="#market">Market Insights</a>
+    <a href="#reddit">Reddit Pulse</a>
+    <a href="#strategic">Strategy</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- TOP STORIES -->
+  <div class="section" id="top-stories">
+    <div class="section-header">
+      <div class="section-icon" style="background:#f0f5ff;">&#x1F4E2;</div>
+      <h2>Top Stories</h2>
+    </div>
+
+    <div class="card top-story">
+      <div class="tag top">Top Story</div>
+      <h3>Atera Launches "Robin" — Autonomous AI IT Agent at Autonomy Day</h3>
+      <p>Atera unveiled the next generation of Robin by Atera on March 10, with a major Autonomy Day showcase on March 17. Robin is an autonomous, action-oriented AI agent that sits on the endpoint and takes real action — resetting passwords, installing software with admin rights, restarting stuck services, and performing profile resets. Atera claims Robin fixes 90% of IT issues with a 0.1-second response time, and is now expandable via playbooks, MCP integrations, and custom APIs.</p>
+      <div class="source">Source: <a href="https://www.atera.com/lp/autonomy-day-march-2026/" target="_blank">Atera Autonomy Day</a> &middot; <a href="https://www.prnewswire.com/news-releases/atera-declares-an-end-to-workplace-tech-bottlenecks-expands-global-enterprise-growth-with-launch-of-robin-by-atera-and-let-people-work-campaign-302709620.html" target="_blank">PR Newswire</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        This is the most direct competitor move against GoTo Resolve's Nexus vision. Atera is positioning Robin as the AI-first IT agent that renders traditional ticketing obsolete. Their "Let People Work" campaign reframes the value prop exactly where Nexus aims to land — human technicians as orchestrators, not executors. Robin's MCP integration support signals Atera is also thinking about the agentic ecosystem play. This demands close competitive tracking.
+      </div>
+    </div>
+
+    <div class="card top-story">
+      <div class="tag top">Top Story</div>
+      <h3>ConnectWise ScreenConnect Hit by Critical Hijacking Vulnerability (CVE-2026-3564)</h3>
+      <p>ConnectWise disclosed and patched a critical cryptographic signature verification vulnerability in ScreenConnect (CVE-2026-3564) that could allow unauthenticated remote attackers to extract machine keys and hijack sessions. All versions before 26.1 are affected. Cloud users were auto-patched, but on-premises deployments must upgrade immediately.</p>
+      <div class="source">Source: <a href="https://www.bleepingcomputer.com/news/security/connectwise-patches-new-flaw-allowing-screenconnect-hijacking/" target="_blank">BleepingComputer</a> &middot; <a href="https://www.helpnetsecurity.com/2026/03/20/connectwise-screenconnect-cve-2026-3564/" target="_blank">Help Net Security</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Another ScreenConnect security incident reinforces GoTo's competitive narrative around zero-trust security in Resolve/Rescue. Every ScreenConnect vulnerability is an opportunity for GoTo sales to position against ConnectWise on security trust. Worth flagging to product marketing.
+      </div>
+    </div>
+
+    <div class="card top-story">
+      <div class="tag top">Top Story</div>
+      <h3>CISA Issues Emergency Endpoint Management Alert After Stryker Breach</h3>
+      <p>Following a devastating March 11 cyberattack on medical technology giant Stryker Corp., CISA issued an urgent advisory urging all organizations to harden endpoint management systems. The Iran-linked threat actor Handala claimed to have accessed 200,000 devices and wiped thousands, disrupting ordering, manufacturing, and shipping. CISA specifically called out Microsoft Intune hardening practices.</p>
+      <div class="source">Source: <a href="https://www.cisa.gov/news-events/alerts/2026/03/18/cisa-urges-endpoint-management-system-hardening-after-cyberattack-against-us-organization" target="_blank">CISA Alert</a> &middot; <a href="https://www.cybersecuritydive.com/news/cisa-organizations-harden-endpoint-security-stryker-attack/815193/" target="_blank">Cybersecurity Dive</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        A watershed moment for endpoint management security. The attack targeted the management layer itself — validating zero-trust architecture in RMM/UEM tools. GoTo Resolve's zero-trust model becomes a differentiator. The Nexus architecture must bake in these hardening practices from day one.
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPETITOR MOVES -->
+  <div class="section" id="competitor-moves">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fff3e0;">&#x1F3AF;</div>
+      <h2>Competitor Moves</h2>
+    </div>
+
+    <div class="card">
+      <div class="tag competitor">Competitor</div>
+      <h3>NinjaOne Launches AI-Driven Vulnerability Management</h3>
+      <p>NinjaOne announced NinjaOne Vulnerability Management on March 16 — combining AI-driven real-time vulnerability assessment, patch confidence scoring, and autonomous patching workflows. Beta-tested across 500,000+ endpoints, it uses existing device telemetry with no intrusive scanning. NinjaOne's ARR has grown 70% YoY to $500M+ with 35,000+ customers.</p>
+      <div class="source">Source: <a href="https://siliconangle.com/2026/03/16/ninjaone-launches-ai-driven-vulnerability-management-speed-detection-remediation/" target="_blank">SiliconANGLE</a> &middot; <a href="https://www.ninjaone.com/press/vulnerability-management/" target="_blank">NinjaOne</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        NinjaOne continues its platform expansion — moving from RMM into vulnerability management after the Dropsuite backup acquisition. Their "no-scan" telemetry approach is smart. GoTo needs to track whether this pulls NinjaOne ahead on security integration.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag competitor">Competitor</div>
+      <h3>Kaseya Digital Workforce Approaching Spring 2026 Launch</h3>
+      <p>Kaseya's AI-powered Digital Workforce enters limited availability in Q2 2026. The system consists of "digital specialists" using agentic reasoning that can diagnose issues, recommend fixes, and handle remediation at scale — operating across Kaseya's unified platform data stream.</p>
+      <div class="source">Source: <a href="https://www.channele2e.com/news/kaseya-deepens-ai-push-with-digital-workforce-and-inky-acquisition" target="_blank">ChannelE2E</a> &middot; <a href="https://www.kaseya.com/press-release/kaseya-announces-latest-innovations-at-dattocon-2025/" target="_blank">Kaseya</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Kaseya is making the same agentic bet as GoTo with Nexus. Their platform breadth (VSA + Datto + INKY + BMS) creates rich data context for agents. GoTo needs to differentiate on the headless execution engine / API-first approach vs. Kaseya's closed-ecosystem model.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag competitor">Competitor</div>
+      <h3>ManageEngine Ships Causal AI and Autonomous AIOps in Site24x7</h3>
+      <p>ManageEngine added causal intelligence and autonomous AI to Site24x7, analyzing signals across applications, infrastructure, and networks. Paired with Zoho's Qntrl orchestration engine, it filters ~90% of alert noise and dramatically reduces MTTR.</p>
+      <div class="source">Source: <a href="https://www.manageengine.com/news/site24x7-aiops-features-2026.html" target="_blank">ManageEngine</a> &middot; <a href="https://www.helpnetsecurity.com/2026/02/17/manageengine-site24x7-ai-capabilities/" target="_blank">Help Net Security</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        ManageEngine is building the AI execution layer in observability first, then likely extending to endpoint management. The Qntrl workflow orchestration integration is their version of a headless execution engine — connecting monitoring insights to automated remediation.
+      </div>
+    </div>
+  </div>
+
+  <!-- AI & AGENTIC IT -->
+  <div class="section" id="ai-agentic">
+    <div class="section-header">
+      <div class="section-icon" style="background:#f3e5f5;">&#x1F916;</div>
+      <h2>AI &amp; Agentic IT</h2>
+    </div>
+
+    <div class="card">
+      <div class="tag ai">AI &amp; Agentic</div>
+      <h3>IBM Report: 53% of Organizations Now Use AI Agents for ITOps</h3>
+      <p>A new IBM study reveals 53% of organizations say AI agents handle at least a quarter of ITOps tasks autonomously, while 8% assign 75-89% of tasks to agents. IBM is advancing ATOM (Autonomous Threat Operations Machine) and building toward agentic AI ops across cloud, private infrastructure, on-premises, and edge.</p>
+      <div class="source">Source: <a href="https://www.ibm.com/think/insights/itops-hits-a-turning-point-with-agentic-ai" target="_blank">IBM Think</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Strong market validation for GoTo's agentic bets. IBM's multi-environment vision (cloud + on-prem + edge) sets the bar for enterprise buyers. Resolve's headless execution engine needs to operate across these environments to be invokable by orchestration layers.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag ai">AI &amp; Agentic</div>
+      <h3>Fabrix.ai Named in Six Gartner Agentic AI Reports</h3>
+      <p>Fabrix.ai was recognized across six Gartner publications spanning IT operations, observability, SRE, and emerging technology. Their Context-Engine and Agentic Data Federation emphasize reliability (no hallucinations) and explainability. Gartner rates agentic AI at "Very High" mass impact.</p>
+      <div class="source">Source: <a href="https://www.prnewswire.com/news-releases/fabrixai-named-in-multiple-gartner-agentic-ai-reports-across-ai-sre-observability-csp-assurance-it-operations--emerging-tech-categories-302725643.html" target="_blank">PR Newswire</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Agentic AI for IT operations is now an established Gartner category. The emphasis on governance and explainability signals what enterprise buyers will demand. Nexus and the headless engine should design for auditability from the start.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag ai">AI &amp; Agentic</div>
+      <h3>Gartner: 70% of Enterprises Will Deploy Agentic AI in I&amp;O by 2029</h3>
+      <p>Gartner forecasts 70% agentic AI adoption in IT infrastructure operations by 2029 (up from &lt;5% in 2025). AI will evolve "from tools that assist humans to platforms that replace manual effort." 40% of enterprise apps will feature task-specific AI agents by end of 2026.</p>
+      <div class="source">Source: <a href="https://www.gartner.com/en/documents/7242030" target="_blank">Gartner</a> &middot; <a href="https://www.itential.com/resource/analyst-report/gartner-predicts-2026-ai-agents-will-reshape-infrastructure-operations/" target="_blank">Itential</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        The 5% → 70% trajectory validates strategic urgency. Gartner's framing of teams moving from "operators who do tasks" to "leaders who supervise systems" is exactly the Nexus thesis. GoTo should use this language in positioning and analyst briefings.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag ai">AI &amp; Agentic</div>
+      <h3>Agentic Workflow Startups Raising Big Rounds</h3>
+      <p>Edra raised $30M Series A from Sequoia for software agents that ingest company data and execute tasks across business apps. Lio raised $30M from Andreessen Horowitz for AI procurement agents. Capital is flowing into the "invoke and orchestrate" layer.</p>
+      <div class="source">Source: <a href="https://techcrunch.com/2026/03/05/lio-ai-series-a-a16z-30m-raise-automate-enterprise-procurement/" target="_blank">TechCrunch</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        These workflow agent startups are building the orchestration layer GoTo's headless execution engine thesis anticipates. The question: does Resolve become one of the tools these agents call, or gets bypassed?
+      </div>
+    </div>
+  </div>
+
+  <!-- MSP & CHANNEL -->
+  <div class="section" id="msp-channel">
+    <div class="section-header">
+      <div class="section-icon" style="background:#e8f5e9;">&#x1F4BC;</div>
+      <h2>MSP &amp; Channel</h2>
+    </div>
+
+    <div class="card">
+      <div class="tag msp">MSP &amp; Channel</div>
+      <h3>87% of MSPs Plan to Increase AI Investment in 2026</h3>
+      <p>Industry surveys show 87% of MSPs plan to increase AI investments, with service desk automation expected to reduce ticket volume by 40-60%. Cybersecurity is the fastest-growing MSP service segment at 18% annual growth. MSPs are evolving from IT support providers to technology operators.</p>
+      <div class="source">Source: <a href="https://www.channele2e.com/news/channel-brief-the-quiet-push-to-2026-why-partners-cant-wait-anymore" target="_blank">ChannelE2E</a> &middot; <a href="https://deskday.com/managed-service-provider-trends/" target="_blank">DeskDay</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        The 40-60% ticket reduction expectation aligns with Atera's Robin and Kaseya's Digital Workforce positioning. GoTo needs a clear, credible AI story for MSP buyers or risks being perceived as behind the curve.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag msp">MSP &amp; Channel</div>
+      <h3>CRN 2026 MSP 500 List Published</h3>
+      <p>CRN released its 2026 MSP 500, reflecting a market defined by platform consolidation, security-first service delivery, and AI-augmented operations.</p>
+      <div class="source">Source: <a href="https://gstinc.com/gst-named-to-crns-2026-managed-service-provider-elite-150-list/" target="_blank">CRN / GST</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Worth reviewing the full list for tool adoption patterns among top MSPs. Useful intelligence for GoTo's PLG and channel strategy.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="section" id="security">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fdf0ef;">&#x1F6E1;</div>
+      <h2>Security &amp; Vulnerability Management</h2>
+    </div>
+
+    <div class="card security">
+      <div class="tag security">Security</div>
+      <h3>Microsoft Patch Tuesday: AI Copilot Becomes an Attack Vector (CVE-2026-26144)</h3>
+      <p>March Patch Tuesday addressed 83 CVEs. The headline: CVE-2026-26144, a critical Excel XSS flaw that weaponizes Copilot Agent mode to silently exfiltrate data with zero user interaction. Two additional critical Office RCE flaws are exploitable via the Preview Pane.</p>
+      <div class="source">Source: <a href="https://www.theregister.com/2026/03/10/zeroclick_microsoft_info_disclosure_bug/" target="_blank">The Register</a> &middot; <a href="https://winbuzzer.com/2026/03/12/microsoft-march-2026-patch-tuesday-84-fixes-two-zero-days-an-xcxwbn/" target="_blank">WinBuzzer</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        A landmark vulnerability showing AI assistants with autonomous action create entirely new attack surfaces. Directly relevant to Nexus: any AI agent acting on endpoints must have robust guardrails against prompt injection, XSS manipulation, and unauthorized exfiltration.
+      </div>
+    </div>
+
+    <div class="card security">
+      <div class="tag security">Security</div>
+      <h3>Enterprise Endpoint Security Failing 20% of the Time</h3>
+      <p>A new report warns cybersecurity software fails at ~20%. Nearly 10% of endpoints are now permanently unpatched, and 24% of vulnerability management platforms operate outside compliance — up from 20% the previous year.</p>
+      <div class="source">Source: <a href="https://www.infosecurity-magazine.com/news/cybersecurity-software-failure-20/" target="_blank">Infosecurity Magazine</a> &middot; <a href="https://www.helpnetsecurity.com/2026/03/25/ciso-enterprise-endpoint-security-gaps/" target="_blank">Help Net Security</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        The growing compliance gap validates autonomous patching solutions and AI-driven endpoint management. Resolve's automation capabilities should be positioned against this pain point.
+      </div>
+    </div>
+
+    <div class="card security">
+      <div class="tag security">Security</div>
+      <h3>13 Unpatched Ivanti Endpoint Manager Vulnerabilities Disclosed</h3>
+      <p>ZDI dropped 13 unpatched vulnerabilities in Ivanti Endpoint Manager, highlighting ongoing security concerns for a major UEM competitor.</p>
+      <div class="source">Source: <a href="https://www.securityweek.com/zdi-drops-13-unpatched-ivanti-endpoint-manager-vulnerabilities/" target="_blank">SecurityWeek</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Competitive ammunition for enterprise deals where Ivanti is the incumbent UEM vendor.
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET INSIGHTS -->
+  <div class="section" id="market">
+    <div class="section-header">
+      <div class="section-icon" style="background:#e3f2fd;">&#x1F4CA;</div>
+      <h2>Market &amp; Analyst Insights</h2>
+    </div>
+
+    <div class="card">
+      <div class="tag market">Market</div>
+      <h3>Gartner Retires the ITSM Magic Quadrant</h3>
+      <p>Gartner has officially retired its Magic Quadrant for ITSM Platforms. IT leaders now navigate a crowded, unranked market. The most recent reference is the Forrester Wave: Enterprise Service Management Platforms, Q4 2025.</p>
+      <div class="source">Source: <a href="https://itsm.tools/2022-gartner-magic-quadrant-for-it-service-management/" target="_blank">ITSM.tools</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Reduces the analyst-driven "shortlist" effect. Buyers will rely more on peer reviews and community sentiment — making PLG motion and community advocacy more important than ever for GoTo Resolve.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tag market">Market</div>
+      <h3>RMM Market: Kaseya 25.9%, ConnectWise 25.4%, NinjaOne Surges to Third</h3>
+      <p>Canalys estimates put Kaseya at 25.9% RMM market share, ConnectWise at 25.4%, with NinjaOne third at 9.8% after leapfrogging N-able. NinjaOne's mindshare on Gartner Peer Insights declined from 20.9% to 11.7% YoY, while Datto (Kaseya) rose.</p>
+      <div class="source">Source: <a href="https://www.channelfutures.com/psa-rmm/kaseya-and-connectwise-face-off-market-leaders-revealed" target="_blank">Channel Futures</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        GoTo Resolve doesn't appear in top-tier rankings — reinforcing the gap between UEM/RMM ambitions and actual market footprint. The agentic AI play may be the leapfrog, but only with strong execution.
+      </div>
+    </div>
+  </div>
+
+  <!-- REDDIT PULSE -->
+  <div class="section" id="reddit">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fff3e0;">&#x1F4AC;</div>
+      <h2>Reddit Pulse</h2>
+    </div>
+
+    <div class="card">
+      <div class="tag reddit">Reddit</div>
+      <h3>r/msp Sentiment: Kaseya Remains Most Controversial Vendor</h3>
+      <p>Community sentiment analysis shows Kaseya at a net score of -41.7 (lowest of any major vendor) with over half of mentions negative. Key complaints: aggressive sales, the 2021 REvil incident, and legacy billing. ConnectWise scored +26.4, NinjaOne +22.7. Common themes include alert fatigue across RMM platforms and difficult ConnectWise onboarding.</p>
+      <div class="source">Source: <a href="https://channeldailynews.com/news/the-reddit-recap-heroics-at-the-bar-hard-lessons-rmm-comparisons/67608" target="_blank">Channel Daily News</a> &middot; <a href="https://www.flamingo.run/blog/best-kaseya-alternative" target="_blank">Flamingo MSP</a></div>
+      <div class="so-what">
+        <strong>So What?</strong>
+        Kaseya's trust deficit is a competitive opening. GoTo Resolve's absence from these conversations is itself a signal — the PLG motion needs to generate organic community advocacy. NinjaOne's positive sentiment + rapid expansion makes them the competitor to watch most closely.
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGIC IMPLICATIONS -->
+  <div class="strategic" id="strategic">
+    <h2>Strategic Implications for GoTo Resolve</h2>
+
+    <div class="strategic-item">
+      <h3>1. The Agentic IT Race Is Now a Three-Way Sprint</h3>
+      <p>Atera (Robin), Kaseya (Digital Workforce), and GoTo (Nexus) are converging on the same thesis: AI agents as autonomous IT technicians. Atera is furthest ahead in market messaging. Kaseya has platform breadth. <strong>GoTo needs to accelerate Nexus visibility and articulate what makes its approach architecturally distinct — particularly the headless execution engine / API-first angle that neither competitor is emphasizing.</strong> The window for narrative leadership is closing.</p>
+    </div>
+
+    <div class="strategic-item">
+      <h3>2. The Headless Execution Engine Thesis Gets Stronger Validation</h3>
+      <p>IBM data (53% agent adoption), Gartner's 70%-by-2029 prediction, and VC funding in agentic workflow startups all confirm the orchestration layer is the next infrastructure battleground. <strong>The priority should be defining and publishing the API surface that lets external agents invoke Resolve's capabilities.</strong> Being "invokable" by the emerging agent ecosystem may matter more than having the best standalone AI.</p>
+    </div>
+
+    <div class="strategic-item">
+      <h3>3. Security Is the New Table Stakes for Agentic Systems</h3>
+      <p>The Stryker/CISA alert and CVE-2026-26144 (Copilot-as-attack-vector) together paint a clear picture: autonomous AI agents on endpoints are both the future and a massive new attack surface. <strong>Nexus's security architecture must be designed with this threat model from the ground up</strong> — zero-trust, dual-approval, auditability, and prompt injection resistance as core requirements.</p>
+    </div>
+
+    <div class="strategic-item">
+      <h3>4. NinjaOne Is Building a Full-Stack Moat</h3>
+      <p>Vulnerability management launch + Dropsuite acquisition + 70% ARR growth + strong community sentiment = systematic platform expansion. <strong>GoTo should conduct a detailed gap analysis of NinjaOne's expanding feature set against Resolve's roadmap.</strong> Where Resolve can't compete feature-for-feature, the agentic differentiation becomes critical.</p>
+    </div>
+
+    <div class="strategic-item">
+      <h3>5. PLG and Community Presence Need Urgent Attention</h3>
+      <p>Resolve's absence from Reddit discussions + Gartner MQ retirement means organic discovery matters more than ever. <strong>The PLG strategy should include community engagement, developer documentation for the headless API, and seeding AI-first use cases that generate word-of-mouth.</strong> Atera's Autonomy Day event format is a playbook worth studying.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <h3>Sources</h3>
+    <ul>
+      <li><a href="https://www.atera.com/lp/autonomy-day-march-2026/" target="_blank">Atera Autonomy Day</a></li>
+      <li><a href="https://www.prnewswire.com/news-releases/atera-declares-an-end-to-workplace-tech-bottlenecks-expands-global-enterprise-growth-with-launch-of-robin-by-atera-and-let-people-work-campaign-302709620.html" target="_blank">Atera Robin Launch PR</a></li>
+      <li><a href="https://www.bleepingcomputer.com/news/security/connectwise-patches-new-flaw-allowing-screenconnect-hijacking/" target="_blank">BleepingComputer — ScreenConnect</a></li>
+      <li><a href="https://www.cisa.gov/news-events/alerts/2026/03/18/cisa-urges-endpoint-management-system-hardening-after-cyberattack-against-us-organization" target="_blank">CISA Stryker Alert</a></li>
+      <li><a href="https://www.channelfutures.com/psa-rmm/kaseya-and-connectwise-face-off-market-leaders-revealed" target="_blank">Channel Futures — RMM Market</a></li>
+      <li><a href="https://www.channele2e.com/news/channel-brief-the-quiet-push-to-2026-why-partners-cant-wait-anymore" target="_blank">ChannelE2E — MSP Trends</a></li>
+      <li><a href="https://www.channele2e.com/news/kaseya-deepens-ai-push-with-digital-workforce-and-inky-acquisition" target="_blank">ChannelE2E — Kaseya</a></li>
+      <li><a href="https://www.cybersecuritydive.com/news/cisa-organizations-harden-endpoint-security-stryker-attack/815193/" target="_blank">Cybersecurity Dive — Stryker</a></li>
+      <li><a href="https://www.prnewswire.com/news-releases/fabrixai-named-in-multiple-gartner-agentic-ai-reports-across-ai-sre-observability-csp-assurance-it-operations--emerging-tech-categories-302725643.html" target="_blank">Fabrix.ai Gartner Recognition</a></li>
+      <li><a href="https://www.gartner.com/en/documents/7242030" target="_blank">Gartner — AI Agents Predictions</a></li>
+      <li><a href="https://www.helpnetsecurity.com/2026/03/20/connectwise-screenconnect-cve-2026-3564/" target="_blank">Help Net Security — ScreenConnect</a></li>
+      <li><a href="https://www.helpnetsecurity.com/2026/03/25/ciso-enterprise-endpoint-security-gaps/" target="_blank">Help Net Security — Endpoint Gaps</a></li>
+      <li><a href="https://www.ibm.com/think/insights/itops-hits-a-turning-point-with-agentic-ai" target="_blank">IBM — Agentic AI ITOps</a></li>
+      <li><a href="https://www.infosecurity-magazine.com/news/cybersecurity-software-failure-20/" target="_blank">Infosecurity Magazine</a></li>
+      <li><a href="https://www.itential.com/resource/analyst-report/gartner-predicts-2026-ai-agents-will-reshape-infrastructure-operations/" target="_blank">Itential — Gartner Predictions</a></li>
+      <li><a href="https://www.manageengine.com/news/site24x7-aiops-features-2026.html" target="_blank">ManageEngine — Site24x7</a></li>
+      <li><a href="https://www.ninjaone.com/press/vulnerability-management/" target="_blank">NinjaOne — Vuln Mgmt</a></li>
+      <li><a href="https://www.securityweek.com/zdi-drops-13-unpatched-ivanti-endpoint-manager-vulnerabilities/" target="_blank">SecurityWeek — Ivanti</a></li>
+      <li><a href="https://siliconangle.com/2026/03/16/ninjaone-launches-ai-driven-vulnerability-management-speed-detection-remediation/" target="_blank">SiliconANGLE — NinjaOne</a></li>
+      <li><a href="https://www.theregister.com/2026/03/10/zeroclick_microsoft_info_disclosure_bug/" target="_blank">The Register — CVE-2026-26144</a></li>
+      <li><a href="https://winbuzzer.com/2026/03/12/microsoft-march-2026-patch-tuesday-84-fixes-two-zero-days-an-xcxwbn/" target="_blank">WinBuzzer — Patch Tuesday</a></li>
+    </ul>
+    <div class="footer-note">
+      Generated automatically &middot; IT Industry News Digest &middot; Week of March 30, 2026
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

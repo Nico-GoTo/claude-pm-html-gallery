@@ -1,61 +1,107 @@
 [
   {
-    "title": "Competitive Landscape — Agentic IT Management Tools",
+    "title": "GoTo Resolve — VoC 80/20 Analysis",
     "author": "Team",
     "date": "2026-04-01",
-    "summary": "Comparison of emerging agentic IT platforms and where Resolve's headless execution engine fits in the ecosystem.",
+    "summary": "April 1, 2026 · Data from JIRA, Salesforce, Slack, Databricks NPS Surveys · Prepared for Resolve PM team",
     "tags": [
       "Resolve",
-      "AI",
-      "competitive"
-    ],
-    "file": "analyses/competitive-agentic-it.html"
-  },
-  {
-    "title": "Nexus Agent Interaction Patterns",
-    "author": "Team",
-    "date": "2026-04-01",
-    "summary": "Synthesis of 12 user interviews exploring how IT technicians want to interact with AI agents in the Nexus paradigm. The key finding: technicians overwhelmingly prefer a \"supervise and approve\"…",
-    "tags": [
+      "Rescue",
       "Nexus",
       "AI",
-      "strategy",
-      "user-research"
+      "PLG",
+      "RMM"
     ],
-    "file": "analyses/nexus-agent-patterns.html"
+    "file": "analyses/Resolve_VoC_80-20_Analysis.html"
   },
   {
-    "title": "Rescue Session Volume Trends",
+    "title": "GoTo Resolve — Troubleshooting Agent: Technical Overview",
     "author": "Team",
     "date": "2026-04-01",
-    "summary": "Analysis of Rescue session volumes, peak times, and resolution rates over the past 6 months.",
-    "tags": [
-      "Rescue",
-      "trends"
-    ],
-    "file": "analyses/rescue-session-trends.html"
-  },
-  {
-    "title": "Resolve Funnel Drop-off Analysis — Q1 2026",
-    "author": "Team",
-    "date": "2026-04-01",
-    "summary": "This analysis examines the trial-to-paid conversion funnel for GoTo Resolve in Q1 2026. We identified three critical drop-off points that account for approximately 62% of all lost conversions.",
+    "summary": "A multi-agent AI pipeline that diagnoses, remediates, and verifies IT support issues — end to end — with a human technician in the loop.",
     "tags": [
       "Resolve",
-      "PLG",
-      "funnel"
+      "AI",
+      "RMM",
+      "strategy",
+      "sales",
+      "architecture"
     ],
-    "file": "analyses/resolve-funnel-q1-2026.html"
+    "file": "analyses/troubleshooting-agent-overview.html"
   },
   {
-    "title": "RMM Feature Adoption Heatmap",
+    "title": "IT Industry News Digest — Week of March 30, 2026",
     "author": "Team",
-    "date": "2026-04-01",
-    "summary": "Which RMM features are actually being used vs. which we're investing in. The gap is stark.",
+    "date": "2026-03-30",
+    "summary": "Atera unveiled the next generation of Robin by Atera on March 10, with a major Autonomy Day showcase on March 17. Robin is an autonomous, action-oriented AI agent that sits on the endpoint and…",
     "tags": [
+      "Resolve",
+      "Rescue",
+      "Nexus",
+      "AI",
+      "PLG",
+      "RMM"
+    ],
+    "file": "analyses/IT-Industry-News-Digest-2026-03-30.html"
+  },
+  {
+    "title": "Weekly Sales Digest",
+    "author": "Team",
+    "date": "2026-03-30",
+    "summary": "Deals created between Mar 23 – Mar 30, sorted by amount.",
+    "tags": [
+      "Resolve",
+      "Rescue",
+      "AI",
+      "PLG",
       "RMM",
       "analytics"
     ],
-    "file": "analyses/rmm-feature-adoption.html"
+    "file": "analyses/weekly-sales-digest-2026-03-30.html"
+  },
+  {
+    "title": "Resolve Device Data — Pipeline Architecture",
+    "author": "Team",
+    "date": "2026-03-28",
+    "summary": "End-to-end telemetry pipeline: from endpoint agents collecting raw system data to cloud-processed, queryable device intelligence at scale.",
+    "tags": [
+      "Resolve",
+      "Nexus",
+      "AI",
+      "RMM",
+      "analytics",
+      "strategy"
+    ],
+    "file": "analyses/resolve-device-data-viz.html"
+  },
+  {
+    "title": "Proactive Endpoint Diagnostics — GoTo Resolve Pitch",
+    "author": "Team",
+    "date": "2026-03-21",
+    "summary": "A lightweight, deterministic health scoring engine that surfaces endpoint issues to IT technicians before users file tickets — built natively into GoTo Resolve.",
+    "tags": [
+      "Resolve",
+      "AI",
+      "RMM",
+      "analytics",
+      "competitive",
+      "strategy"
+    ],
+    "file": "analyses/proactive-diagnostics-pitch.html"
+  },
+  {
+    "title": "PM Pitch Workflow — From Idea to Opportunity Council",
+    "author": "Team",
+    "date": "2026-03-20",
+    "summary": "How to use Claude Cowork to turn a product idea into a JIRA pitch item, ready for leadership review.",
+    "tags": [
+      "Resolve",
+      "AI",
+      "RMM",
+      "analytics",
+      "competitive",
+      "strategy"
+    ],
+    "file": "analyses/pm-pitch-workflow.html"
   }
 ]

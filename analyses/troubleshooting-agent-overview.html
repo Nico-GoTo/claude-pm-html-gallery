@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoTo Resolve — Troubleshooting Agent: Technical Overview</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #131825;
+      --surface-alt: #1a2035;
+      --border: #232b42;
+      --text: #e2e8f0;
+      --text-muted: #8892a8;
+      --accent: #6c8cff;
+      --accent-dim: #3a4f8a;
+      --green: #34d399;
+      --green-dim: rgba(52,211,153,.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251,191,36,.12);
+      --red: #f87171;
+      --red-dim: rgba(248,113,113,.12);
+      --purple: #a78bfa;
+      --purple-dim: rgba(167,139,250,.12);
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34,211,238,.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 100px 40px 80px;
+      text-align: center;
+      background: linear-gradient(175deg, #0d1224 0%, #111a33 40%, #0f1a2e 100%);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 30% 20%, rgba(108,140,255,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 350px at 70% 60%, rgba(167,139,250,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-dim);
+      background: rgba(108,140,255,.06);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: .4px;
+      margin-bottom: 28px;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 700;
+      letter-spacing: -1.2px;
+      line-height: 1.15;
+      max-width: 800px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #fff 20%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ─── Container ─── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+
+    /* ─── Section ─── */
+    section { padding: 80px 0; }
+    section + section { border-top: 1px solid var(--border); }
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      margin-bottom: 12px;
+    }
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* ─── Pipeline Diagram ─── */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      margin-bottom: 56px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .pipeline-step {
+      background: var(--surface);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .pipeline-step::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+    .pipeline-step:last-child::after { display: none; }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+    .step-1 .step-number { background: var(--cyan-dim); color: var(--cyan); }
+    .step-2 .step-number { background: var(--purple-dim); color: var(--purple); }
+    .step-3 .step-number { background: var(--amber-dim); color: var(--amber); }
+    .step-4 .step-number { background: var(--green-dim); color: var(--green); }
+    .pipeline-step h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pipeline-step p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ─── Agent Detail Cards ─── */
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      margin-bottom: 32px;
+    }
+    .agent-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .agent-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .agent-card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+    }
+    .agent-card h3 span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+    .agent-body { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .agent-body p { color: var(--text-muted); font-size: 15px; line-height: 1.75; }
+    .agent-body p strong { color: var(--text); font-weight: 600; }
+
+    /* ─── Feature list ─── */
+    .feat-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .feat-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .feat-list li::before {
+      content: '▸';
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1.6;
+      flex-shrink: 0;
+    }
+
+    /* ─── Endpoint Table ─── */
+    .endpoint-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    .endpoint-table th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .endpoint-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .endpoint-table tr:last-child td { border-bottom: none; }
+    .method-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+    .method-post { background: var(--green-dim); color: var(--green); }
+    .method-get { background: var(--cyan-dim); color: var(--cyan); }
+    .method-delete { background: var(--red-dim); color: var(--red); }
+    code, .mono {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      background: var(--surface-alt);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: var(--accent);
+    }
+
+    /* ─── Architecture Diagram (CSS) ─── */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      margin-top: 32px;
+    }
+    .arch-row {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .arch-row:last-child { margin-bottom: 0; }
+    .arch-box {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .arch-box small {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .arch-box.frontend { background: rgba(34,211,238,.06); border-color: rgba(34,211,238,.2); color: var(--cyan); }
+    .arch-box.backend { background: rgba(108,140,255,.06); border-color: rgba(108,140,255,.2); color: var(--accent); }
+    .arch-box.infra { background: rgba(167,139,250,.06); border-color: rgba(167,139,250,.2); color: var(--purple); }
+    .arch-box.service { background: rgba(251,191,36,.06); border-color: rgba(251,191,36,.2); color: var(--amber); }
+    .arch-connector {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 18px;
+      padding: 4px 0;
+      letter-spacing: 4px;
+    }
+
+    /* ─── Tool Grid ─── */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .tool-chip {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px;
+    }
+    .tool-chip strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .tool-chip span {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ─── Flow Diagram ─── */
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      padding-left: 28px;
+    }
+    .flow-step {
+      position: relative;
+      padding: 16px 0 16px 28px;
+      border-left: 2px solid var(--border);
+    }
+    .flow-step:last-child { border-left-color: transparent; }
+    .flow-dot {
+      position: absolute;
+      left: -9px;
+      top: 18px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .flow-step:nth-child(1) .flow-dot { border-color: var(--cyan); background: var(--cyan-dim); }
+    .flow-step:nth-child(2) .flow-dot { border-color: var(--cyan); background: var(--cyan-dim); }
+    .flow-step:nth-child(3) .flow-dot { border-color: var(--purple); background: var(--purple-dim); }
+    .flow-step:nth-child(4) .flow-dot { border-color: var(--purple); background: var(--purple-dim); }
+    .flow-step:nth-child(5) .flow-dot { border-color: var(--amber); background: var(--amber-dim); }
+    .flow-step:nth-child(6) .flow-dot { border-color: var(--amber); background: var(--amber-dim); }
+    .flow-step:nth-child(7) .flow-dot { border-color: var(--green); background: var(--green-dim); }
+    .flow-step:nth-child(8) .flow-dot { border-color: var(--green); background: var(--green-dim); }
+    .flow-step h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .flow-step p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ─── Two-col section ─── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+    /* ─── SSE code block ─── */
+    .code-block {
+      background: #0a0e18;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+    .code-block .kw { color: var(--purple); }
+    .code-block .str { color: var(--green); }
+    .code-block .comment { color: #4a5568; font-style: italic; }
+    .code-block .type { color: var(--cyan); }
+    .code-block .num { color: var(--amber); }
+
+    /* ─── Solution Type Cards ─── */
+    .sol-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 20px; }
+    .sol-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+    }
+    .sol-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sol-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .sol-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: .4px;
+    }
+    .sol-badge.win { background: var(--cyan-dim); color: var(--cyan); }
+    .sol-badge.mac { background: var(--purple-dim); color: var(--purple); }
+    .sol-badge.any { background: var(--amber-dim); color: var(--amber); }
+
+    /* ─── Feedback loop ─── */
+    .loop-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-top: 32px;
+    }
+    .loop-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      background: var(--red-dim);
+    }
+    .loop-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .loop-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+    /* ─── Failure categories ─── */
+    .failure-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .failure-chip {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .failure-chip code {
+      font-size: 12px;
+      display: block;
+      margin-bottom: 6px;
+      background: none;
+      padding: 0;
+    }
+    .failure-chip span {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 860px) {
+      .pipeline { grid-template-columns: 1fr 1fr; }
+      .pipeline-step:nth-child(2)::after { display: none; }
+      .agent-body, .two-col { grid-template-columns: 1fr; }
+      .tool-grid { grid-template-columns: 1fr 1fr; }
+      .sol-grid { grid-template-columns: 1fr; }
+      .failure-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .pipeline { grid-template-columns: 1fr; }
+      .pipeline-step::after { display: none !important; }
+      .tool-grid, .failure-grid { grid-template-columns: 1fr; }
+      .hero { padding: 60px 20px 50px; }
+      .container { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ HERO ════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero-badge"><span class="dot"></span> Technical Overview</div>
+  <h1>Troubleshooting Agent</h1>
+  <p>A multi-agent AI pipeline that diagnoses, remediates, and verifies IT support issues — end to end — with a human technician in the loop.</p>
+</header>
+
+<!-- ════════════════════════════════════════ PIPELINE ═══════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">The Pipeline</div>
+    <div class="section-title">Four Agents, One Workflow</div>
+    <div class="section-subtitle">Each agent receives the output of the previous one, stored in a shared session. The full pipeline can loop when verification fails, enabling iterative troubleshooting.</div>
+
+    <div class="pipeline">
+      <div class="pipeline-step step-1">
+        <div class="step-number">1</div>
+        <h3>Precheck</h3>
+        <p>Triage the ticket — detect language, analyze the problem, suggest devices</p>
+      </div>
+      <div class="pipeline-step step-2">
+        <div class="step-number">2</div>
+        <h3>Observation</h3>
+        <p>Gather live diagnostics from the endpoint via MQTT device tools</p>
+      </div>
+      <div class="pipeline-step step-3">
+        <div class="step-number">3</div>
+        <h3>Solution</h3>
+        <p>Generate executable remediation scripts and action plans</p>
+      </div>
+      <div class="pipeline-step step-4">
+        <div class="step-number">4</div>
+        <h3>Verification</h3>
+        <p>Confirm the fix worked; categorize failures for retry loops</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ AGENT DEEP DIVES ════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Agent Deep Dives</div>
+    <div class="section-title">How Each Agent Works</div>
+    <div class="section-subtitle">Every agent is a LangChain-powered LLM with structured output, tool access, and a detailed system prompt. Responses stream to the frontend via Server-Sent Events.</div>
+
+    <!-- ── Precheck ── -->
+    <div class="agent-card">
+      <div class="agent-card-header">
+        <div class="agent-icon" style="background: var(--cyan-dim); color: var(--cyan);">🔍</div>
+        <h3>Precheck Agent <span>POST /api/v1/precheck-agent/precheck</span></h3>
+      </div>
+      <div class="agent-body">
+        <div>
+          <p>The <strong>first responder</strong> when a technician opens a ticket. It runs a four-step sub-pipeline internally:</p>
+          <ul class="feat-list" style="margin-top: 16px;">
+            <li><strong>Attachment processing</strong> — vision model transcribes error screenshots into text descriptions the downstream agents can read.</li>
+            <li><strong>Language &amp; formality detection</strong> — determines the end-user's language (ISO 639-1) and communication style (casual / formal / very formal) so all future messages match tone, pronouns, and greeting conventions.</li>
+            <li><strong>Ticket analysis</strong> — LLM with knowledge base access classifies: can we identify the problem? Is it device-level? Do we need more info from the user? Generates a status message for the technician and an optional response draft for the end-user.</li>
+            <li><strong>Device discovery</strong> — if device-level and no device linked, the Device Finder queries previous tickets, asset management, and the common device service in parallel to suggest the most likely endpoint, ranked by confidence.</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Smart caching &amp; invalidation</strong> — results are cached per session. When a ticket gets updated (new user comment, attachment, etc.), a dedicated <strong>Ticket Change Impact</strong> sub-agent evaluates whether the delta invalidates previous work. If the user just provided the missing info you asked for, precheck reruns automatically. Administrative or irrelevant changes keep the cache intact.</p>
+          <p style="margin-top: 16px;"><strong>Memory tool</strong> — the precheck agent can store critical findings (known bugs, company-specific configs, KB article references) in namespaced session memory for downstream agents to consume, avoiding redundant knowledge base queries.</p>
+          <div class="code-block" style="margin-top: 20px;">
+<span class="comment">// SSE step events (in order)</span>
+<span class="str">"processing_attachments"</span>
+<span class="str">"language_detection"</span>
+<span class="str">"analyzing_ticket"</span>
+<span class="str">"find_devices"</span>
+
+<span class="comment">// Structured response</span>
+{ <span class="kw">canIdentifyProblem</span>: <span class="type">boolean</span>,
+  <span class="kw">isDeviceLevelProblem</span>: <span class="type">boolean</span>,
+  <span class="kw">needsMoreInformation</span>: <span class="type">boolean</span>,
+  <span class="kw">userResponseMessage</span>: <span class="type">string</span>,
+  <span class="kw">devices</span>: [{ device, confidence, explanation }] }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Observation ── -->
+    <div class="agent-card">
+      <div class="agent-card-header">
+        <div class="agent-icon" style="background: var(--purple-dim); color: var(--purple);">📡</div>
+        <h3>Observation Agent <span>POST /api/v1/observation-agent/observe</span></h3>
+      </div>
+      <div class="agent-body">
+        <div>
+          <p>The <strong>live diagnostics engine</strong>. This agent connects to the endpoint device via MQTT (through Resolve's QuickView / RMM infrastructure) and selectively runs device tools based on the symptoms described in the ticket.</p>
+          <p style="margin-top: 12px;">It also has full access to the <strong>knowledge base</strong> and is explicitly instructed to search it early and often — before, during, and after device investigation — cross-referencing known issues against what it observes on the machine.</p>
+          <p style="margin-top: 12px;">If no device is linked, the agent falls back to <strong>ticket-only analysis</strong> and knowledge base research without device tool access.</p>
+          <p style="margin-top: 12px;">Each observation includes a <strong>severity</strong> (low / medium / high / urgent) and the agent produces an overall <strong>confidence score</strong> (0–1) and a <strong>solvable</strong> flag indicating whether the issue can be resolved remotely via RMM tools.</p>
+        </div>
+        <div>
+          <p><strong>9 Device Diagnostic Tools</strong> — scoped to the linked device, queried via MQTT:</p>
+          <div class="tool-grid">
+            <div class="tool-chip"><strong>cpu_usage</strong><span>Current CPU utilization and load</span></div>
+            <div class="tool-chip"><strong>memory_usage</strong><span>RAM consumption breakdown</span></div>
+            <div class="tool-chip"><strong>disk_usage</strong><span>Storage space per volume</span></div>
+            <div class="tool-chip"><strong>network_traffic</strong><span>Active connections and throughput</span></div>
+            <div class="tool-chip"><strong>system_info</strong><span>OS version, uptime, reboot state</span></div>
+            <div class="tool-chip"><strong>power_status</strong><span>Battery, power plan, AC status</span></div>
+            <div class="tool-chip"><strong>top_processes</strong><span>Highest resource consumers</span></div>
+            <div class="tool-chip"><strong>process_search</strong><span>Find processes by name/PID</span></div>
+            <div class="tool-chip"><strong>event_logs</strong><span>Windows/macOS system event logs</span></div>
+          </div>
+          <p style="margin-top: 16px;"><strong>Previous failure awareness</strong> — if this is a retry loop, the agent reads the <code>verification.last_failure</code> memory entry to understand what went wrong before and adjust its investigation accordingly (e.g., explore alternative root causes if symptoms persisted).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Solution ── -->
+    <div class="agent-card">
+      <div class="agent-card-header">
+        <div class="agent-icon" style="background: var(--amber-dim); color: var(--amber);">⚡</div>
+        <h3>Solution Agent <span>POST /api/v1/solution-agent/solve</span></h3>
+      </div>
+      <div class="agent-body">
+        <div>
+          <p>Takes the observation results and generates <strong>concrete, executable remediation actions</strong>. Has access to the knowledge base (to find documented fix procedures) and the memory tool (to read what the observation agent found), but no device tools.</p>
+          <p style="margin-top: 12px;">Output is <strong>platform-specific</strong> — determined by the linked device's OS. Scripts must be complete, production-ready, and contain zero placeholders.</p>
+          <p style="margin-top: 12px;"><strong>Strict script rules</strong>: no try-catch boilerplate, no COM automation objects (fails under SYSTEM), must run as SYSTEM user on Windows or root on Mac, prefer built-in commands, log meaningful output for the Verification Agent to evaluate.</p>
+          <div class="sol-grid">
+            <div class="sol-card">
+              <h4>PowerShell Scripts <span class="sol-badge win">WINDOWS</span></h4>
+              <p>Automated remediation: service restarts, registry edits, file cleanup, config changes. Executed via Remote Execution Service as SYSTEM.</p>
+            </div>
+            <div class="sol-card">
+              <h4>Virtual Technician <span class="sol-badge win">WINDOWS</span></h4>
+              <p>Step-by-step GUI automation for tasks that can't be scripted: app settings, browser config, user profile changes.</p>
+            </div>
+            <div class="sol-card">
+              <h4>Shell Scripts <span class="sol-badge mac">MACOS</span></h4>
+              <p>macOS remediation: preference resets, service management, file operations. Executed as root via Remote Execution.</p>
+            </div>
+            <div class="sol-card">
+              <h4>Generic Actions <span class="sol-badge any">FALLBACK</span></h4>
+              <p>Manual instructions for the technician when no automation is possible: hardware issues, escalation paths, permission requests.</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p><strong>Risk assessment</strong> — every action is tagged <code>low</code>, <code>medium</code>, or <code>high</code> risk based on reversibility and potential for data loss. Actions are ordered with low-risk first.</p>
+          <p style="margin-top: 12px;"><strong>Response minimalism</strong> — the agent defaults to one action. A second is added only when it covers a distinct, high-confidence remediation path. No "shotgun lists" of loosely related fixes.</p>
+          <p style="margin-top: 12px;"><strong>Never repeats failed solutions</strong> — if a previous attempt exists (tracked in verification memory), the agent must produce a materially different approach. Failure categories guide the pivot strategy:</p>
+          <ul class="feat-list" style="margin-top: 12px;">
+            <li><code>execution_error</code> → simplify commands, break into smaller steps</li>
+            <li><code>symptoms_persist</code> → completely different approach, don't retry</li>
+            <li><code>insufficient_permissions</code> → adjust for actual execution context</li>
+            <li><code>partial_success</code> → fix only the failed steps, keep what worked</li>
+            <li><code>system_conflict</code> → handle interfering software/policies first</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Verification ── -->
+    <div class="agent-card">
+      <div class="agent-card-header">
+        <div class="agent-icon" style="background: var(--green-dim); color: var(--green);">✓</div>
+        <h3>Verification Agent <span>POST /api/v1/verification-agent/verify</span></h3>
+      </div>
+      <div class="agent-body">
+        <div>
+          <p>After a solution is executed, this agent <strong>validates the outcome</strong>. It analyzes execution logs, and if device access is available, re-queries device tools to check the current state against expectations.</p>
+          <p style="margin-top: 12px;"><strong>Three possible verdicts</strong>:</p>
+          <ul class="feat-list" style="margin-top: 10px;">
+            <li><strong style="color: var(--green);">solved</strong> — clear evidence the solution worked and the problem is resolved.</li>
+            <li><strong style="color: var(--red);">not_solved</strong> — evidence of errors, failures, or the problem still exists. Includes a failure object with category and root cause analysis.</li>
+            <li><strong style="color: var(--amber);">uncertain</strong> — logs are inconclusive. Leans toward solved but recommends manual verification by the technician.</li>
+          </ul>
+          <p style="margin-top: 16px;"><strong>Three output audiences</strong> — the agent produces separate content for each:</p>
+          <ul class="feat-list" style="margin-top: 10px;">
+            <li><strong>resolutionDetails</strong> — technical markdown for internal docs and future AI agents (English)</li>
+            <li><strong>resolutionSummary</strong> — 1–2 sentence plain-language outcome for the technician UI (technician's locale)</li>
+            <li><strong>endUserResponse</strong> — polished message for the ticket creator, matching their language and formality level</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Formality mirroring</strong> — the end-user response uses the language and communication style detected by the Precheck Agent. If the user wrote in formal German with "Sie" pronouns, the verification response does the same. If they were casual English with "Hey", the response mirrors that.</p>
+          <p style="margin-top: 16px;"><strong>Failure taxonomy</strong> — when the verdict is <code>not_solved</code> or <code>uncertain</code>, a structured failure object is stored in session memory under the <code>verification</code> namespace. This feeds back into the Observation and Solution agents on the next loop:</p>
+          <div class="failure-grid">
+            <div class="failure-chip"><code style="color: var(--red);">execution_error</code><span>Script or command failed to run at all</span></div>
+            <div class="failure-chip"><code style="color: var(--amber);">partial_success</code><span>Some steps completed, others didn't</span></div>
+            <div class="failure-chip"><code style="color: var(--red);">symptoms_persist</code><span>Executed OK, but original problem remains</span></div>
+            <div class="failure-chip"><code style="color: var(--purple);">insufficient_permissions</code><span>Access denied or privilege issues</span></div>
+            <div class="failure-chip"><code style="color: var(--amber);">system_conflict</code><span>Conflicting software or policies</span></div>
+            <div class="failure-chip"><code style="color: var(--text-muted);">verification_inconclusive</code><span>Not enough evidence either way</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ ARCHITECTURE ═══════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">System Architecture</div>
+    <div class="section-subtitle">NestJS backend with LangChain agents, React frontend embedded in Helpdesk, connected through SSE streaming and frame events.</div>
+
+    <div class="arch-diagram">
+      <div class="arch-row">
+        <div class="arch-box frontend" style="flex: 1;">
+          Helpdesk UI
+          <small>Parent application — Synapse frame events</small>
+        </div>
+      </div>
+      <div class="arch-connector">↕</div>
+      <div class="arch-row">
+        <div class="arch-box frontend">
+          React Frontend Widget
+          <small>Redux state · SSE consumer · Action cards · Remote execution hooks</small>
+        </div>
+      </div>
+      <div class="arch-connector">↕ SSE streams &amp; REST</div>
+      <div class="arch-row">
+        <div class="arch-box backend">Precheck Agent<small>NestJS + LangChain</small></div>
+        <div class="arch-box backend">Observation Agent<small>NestJS + LangChain</small></div>
+        <div class="arch-box backend">Solution Agent<small>NestJS + LangChain</small></div>
+        <div class="arch-box backend">Verification Agent<small>NestJS + LangChain</small></div>
+      </div>
+      <div class="arch-connector">↕</div>
+      <div class="arch-row">
+        <div class="arch-box infra">DynamoDB<small>Session persistence</small></div>
+        <div class="arch-box infra">Knowledge Base<small>Company docs &amp; known issues</small></div>
+        <div class="arch-box service">MQTT / QuickView<small>Live device diagnostics</small></div>
+        <div class="arch-box service">Remote Execution<small>Script execution on endpoints</small></div>
+      </div>
+      <div class="arch-connector">↕</div>
+      <div class="arch-row">
+        <div class="arch-box service" style="flex: 1;">
+          External Services
+          <small>Ticketing (SQS updates) · Common Device Service (GraphQL) · Asset Management</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ SESSION & MEMORY ════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">State Management</div>
+    <div class="section-title">Session &amp; Agent Memory</div>
+    <div class="section-subtitle">A single Session entity per ticket is the backbone — persisted in DynamoDB, keyed by company + ticket ID, with a 1-year TTL.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="agent-card" style="margin-bottom: 0;">
+          <h3 style="font-size: 18px; margin-bottom: 16px;">Session Entity</h3>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7;">The session stores the full state of every pipeline phase: <code>precheck</code>, <code>observation</code>, <code>solution</code>, <code>verification</code> — each with their structured results, stream event replays, and references. It also tracks <code>executedSolutionActions</code> (with run IDs from Remote Execution), <code>deviceSuggestions</code>, cumulative <code>tokenUsage</code>, and the shared <code>memory</code> map.</p>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-top: 12px;">The session's <code>isStale</code> flag is flipped by ticket updates arriving via SQS. When stale, the next agent call triggers re-evaluation rather than serving from cache.</p>
+        </div>
+      </div>
+      <div>
+        <div class="agent-card" style="margin-bottom: 0;">
+          <h3 style="font-size: 18px; margin-bottom: 16px;">Namespaced Memory</h3>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7;">Each agent writes to its own namespace (<code>precheck</code>, <code>observation</code>, <code>solution</code>, <code>verification</code>) using a <code>store_memory</code> tool. Downstream agents receive all accumulated memories as context.</p>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-top: 12px;"><strong>Examples of stored memories:</strong></p>
+          <ul class="feat-list" style="margin-top: 8px;">
+            <li><code>observation:finding-high-memory</code> — "Chrome using 4.2 GB RAM with 47 tabs"</li>
+            <li><code>precheck:known-issue-vpn</code> — "KB-2847: VPN must use IKEv2, not L2TP"</li>
+            <li><code>verification:last_failure</code> — failure category, reason, root cause status</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ FRONTEND UX ════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Frontend Experience</div>
+    <div class="section-title">Technician UI Flow</div>
+    <div class="section-subtitle">The frontend is a React widget embedded in the Helpdesk via iframe. Redux manages state across 6 workflow phases, with real-time SSE streaming and frame event communication.</div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="font-size: 18px; margin-bottom: 20px;">Happy Path (Device-Level Issue)</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Ticket Opens</h4>
+            <p>Widget loads, ticket ID passed in. Orchestrator hook dispatches precheck thunk.</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Precheck Streams</h4>
+            <p>SSE events update the progress bar: "Processing attachments… Detecting language… Analyzing ticket…"</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Device Linking</h4>
+            <p>If device-level and none linked, a LinkDeviceCard shows ranked suggestions. Technician selects one.</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Observation Streams</h4>
+            <p>Agent tool calls appear in real-time: "Checking CPU… Querying event logs… Searching knowledge base…"</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Solution Generated</h4>
+            <p>Action cards render: PowerShell script cards with "Start" buttons, VT plans, or generic steps.</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Execute (Human in the Loop)</h4>
+            <p>Technician can click the script to edit in a modal, then "Start" to execute. Status streams live from Remote Execution.</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Verification</h4>
+            <p>Agent checks execution logs and re-queries device. Verdict card shows: Solved, Not Solved, or Uncertain.</p>
+          </div>
+          <div class="flow-step">
+            <div class="flow-dot"></div>
+            <h4>Resolution</h4>
+            <p>CloseTicketCard shows the end-user response draft. Technician clicks "Send to Customer" to close the ticket.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size: 18px; margin-bottom: 20px;">Frontend Architecture</h3>
+        <div class="agent-card" style="margin-bottom: 16px;">
+          <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">Redux State — Three Slices</h4>
+          <ul class="feat-list">
+            <li><strong>tsaFlowSlice</strong> — core agent state: phase tracking (idle → precheck → observation → solution → verification → completed), all agent results, executed actions, device selection</li>
+            <li><strong>progressSlice</strong> — UI step progress: 6 steps, each with state (open / running / error / done / info / waiting) and streaming messages</li>
+            <li><strong>ticketSlice</strong> — ticket context: ID, status, linked devices</li>
+          </ul>
+        </div>
+        <div class="agent-card" style="margin-bottom: 16px;">
+          <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">Action Card Components</h4>
+          <ul class="feat-list">
+            <li><strong>RemoteExecutionCard</strong> — renders PowerShell/Shell scripts with edit-in-modal and execute capabilities. Shows live execution status.</li>
+            <li><strong>VirtualTechnicianCard</strong> — displays goal + step list. Windows only. Editable plan, auto-executes on apply.</li>
+            <li><strong>GenericActionCard</strong> — read-only manual instructions. No execution button — informational only.</li>
+            <li><strong>AskMoreInfoCard</strong> — when precheck needs info. Text input for additional context.</li>
+            <li><strong>CloseTicketCard</strong> — verification result with "Send to Customer" action.</li>
+          </ul>
+        </div>
+        <div class="agent-card" style="margin-bottom: 0;">
+          <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">Communication Layer</h4>
+          <ul class="feat-list">
+            <li><strong>To Helpdesk</strong> — <code>synapse-app-event</code>: open modals (edit script, edit plan, sources), add comments, close tickets, link devices</li>
+            <li><strong>From Helpdesk</strong> — <code>synapse-frame-event</code>: run modified script, run modified plan, session stale notification</li>
+            <li><strong>Exclusive execution</strong> — only one action can run at a time; cards disable when another is in progress or ticket is closed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Iterative loop -->
+    <div class="loop-card">
+      <div class="loop-icon">🔄</div>
+      <div>
+        <h4>Iterative Troubleshooting Loop</h4>
+        <p>When verification returns <code>not_solved</code> or <code>uncertain</code>, the failure details are stored in session memory. The pipeline can loop back to observation → solution → verification with full awareness of what was already tried and why it failed. Each iteration pivots strategy based on the failure category — the system never retries the same approach blindly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════ API REFERENCE ═════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">API Reference</div>
+    <div class="section-title">Endpoints</div>
+    <div class="section-subtitle">All agent endpoints require a Synapse bearer token and stream responses as Server-Sent Events. Auth: <code>Authorization: Bearer &lt;token&gt;</code></div>
+
+    <div class="agent-card" style="overflow-x: auto;">
+      <table class="endpoint-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+            <th>Response</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/precheck-agent/precheck</code></td>
+            <td>Triage ticket — language, attachments, analysis, devices</td>
+            <td>SSE → structured JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/observation-agent/observe</code></td>
+            <td>Gather diagnostic observations from device + knowledge base</td>
+            <td>SSE → structured JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/solution-agent/solve</code></td>
+            <td>Generate platform-specific remediation actions</td>
+            <td>SSE → structured JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/solution-agent/executed</code></td>
+            <td>Mark a solution action as executed with run ID</td>
+            <td>HTTP 204</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/verification-agent/verify</code></td>
+            <td>Validate executed solutions against logs &amp; device state</td>
+            <td>SSE → structured JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><code>/api/v1/device-finder-agent/find</code></td>
+            <td>Ranked device suggestions for a ticket</td>
+            <td>HTTP 200 JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><code>/api/v1/session/ticket/:ticketId</code></td>
+            <td>Full session state including stream event replay</td>
+            <td>HTTP 200 JSON</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-delete">DEL</span></td>
+            <td><code>/api/v1/session/ticket/:ticketId</code></td>
+            <td>Delete session (dev/test environments only)</td>
+            <td>HTTP 204</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><code>/health</code></td>
+            <td>Health check (public, no auth)</td>
+            <td>HTTP 200 JSON</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TECH STACK ══════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Technology</div>
+    <div class="section-title">Tech Stack</div>
+
+    <div class="tool-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="tool-chip"><strong>NestJS</strong><span>Backend framework, request-scoped DI</span></div>
+      <div class="tool-chip"><strong>LangChain</strong><span>Agent orchestration, tool calling, structured output</span></div>
+      <div class="tool-chip"><strong>GPT-5.1 / 5-mini</strong><span>LLM backbone (configurable per agent)</span></div>
+      <div class="tool-chip"><strong>React + Redux</strong><span>Frontend UI, state management</span></div>
+      <div class="tool-chip"><strong>Vite + pnpm</strong><span>Build tooling, monorepo</span></div>
+      <div class="tool-chip"><strong>DynamoDB</strong><span>Session persistence (1-year TTL)</span></div>
+      <div class="tool-chip"><strong>MQTT</strong><span>Real-time device communication</span></div>
+      <div class="tool-chip"><strong>SSE</strong><span>Streaming agent responses to frontend</span></div>
+      <div class="tool-chip"><strong>SQS</strong><span>Ticket update notifications</span></div>
+      <div class="tool-chip"><strong>GraphQL</strong><span>Common Device Service queries</span></div>
+      <div class="tool-chip"><strong>Vitest</strong><span>Unit + E2E testing</span></div>
+      <div class="tool-chip"><strong>TanStack Router</strong><span>Frontend routing (widget + dialogs)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FOOTER ══════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    GoTo Resolve · Troubleshooting Agent · Technical Overview · April 2026
+  </div>
+</footer>
+
+</body>
+</html>

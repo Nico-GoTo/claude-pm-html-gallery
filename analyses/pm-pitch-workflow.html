@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Pitch Workflow — From Idea to Opportunity Council</title>
+<style>
+  :root {
+    --blue-dark:   #0F3460;
+    --blue-mid:    #1A56A0;
+    --blue-light:  #EFF5FB;
+    --blue-accent: #2778D4;
+    --teal:        #0D7A5F;
+    --teal-light:  #E6F4F0;
+    --amber:       #B45309;
+    --amber-light: #FEF3C7;
+    --purple:      #5B21B6;
+    --purple-light:#EDE9FE;
+    --green:       #166534;
+    --green-light: #DCFCE7;
+    --slate:       #475569;
+    --slate-light: #F8FAFC;
+    --border:      #E2E8F0;
+    --white:       #FFFFFF;
+    --text-dark:   #1E293B;
+    --text-mid:    #475569;
+    --text-light:  #94A3B8;
+    --connector:   #CBD5E1;
+    --radius:      12px;
+    --shadow:      0 2px 12px rgba(15,52,96,0.08);
+    --shadow-hover:0 6px 24px rgba(15,52,96,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #F0F4F9;
+    color: var(--text-dark);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    padding: 48px 40px 52px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #BDD7F5;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  .header h1 {
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .header p {
+    color: #BDD7F5;
+    font-size: 15px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── OUTER LAYOUT ── */
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  /* ── STEP WRAPPER ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── CONNECTOR ── */
+  .connector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 44px;
+    position: relative;
+  }
+  .connector::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: var(--connector);
+  }
+  .connector-arrow {
+    position: relative;
+    z-index: 1;
+    width: 28px; height: 28px;
+    background: var(--white);
+    border: 2px solid var(--connector);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-light);
+    font-size: 14px;
+  }
+
+  /* ── STEP CARD ── */
+  .step {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-number {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--white);
+  }
+  .step-header-text h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+  .step-header-text p {
+    font-size: 13px;
+    color: var(--text-mid);
+    margin-top: 1px;
+  }
+  .step-icon {
+    margin-left: auto;
+    font-size: 26px;
+    opacity: 0.7;
+  }
+  .step-body {
+    padding: 24px;
+  }
+
+  /* Colour themes per step */
+  .step-1 .step-number { background: var(--blue-mid); }
+  .step-1 .step-header { background: var(--blue-light); border-color: #BFDBF7; }
+
+  .step-2 .step-number { background: var(--teal); }
+  .step-2 .step-header { background: var(--teal-light); border-color: #A7D7CA; }
+
+  .step-3 .step-number { background: var(--purple); }
+  .step-3 .step-header { background: var(--purple-light); border-color: #C4B5FD; }
+
+  .step-4 .step-number { background: var(--amber); }
+  .step-4 .step-header { background: var(--amber-light); border-color: #FCD34D; }
+
+  .step-5 .step-number { background: var(--green); }
+  .step-5 .step-header { background: var(--green-light); border-color: #86EFAC; }
+
+  /* ── WHERE TO WORK ── */
+  .login-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--blue-light);
+    border: 1.5px solid #BFDBF7;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .login-url {
+    font-family: monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue-mid);
+    background: var(--white);
+    border: 1px solid #BFDBF7;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin-top: 4px;
+    display: inline-block;
+  }
+  .hint-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .hint-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--slate-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--text-mid);
+  }
+  .hint-chip .chip-icon { font-size: 16px; }
+
+  /* ── PROMPT SECTION ── */
+  .prompt-example {
+    background: #FFFBEB;
+    border-left: 4px solid #F59E0B;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #78350F;
+  }
+  .prompt-example strong { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #92400E; margin-bottom: 6px; }
+  .prompt-example em { font-style: italic; }
+
+  /* ── AUTO / MANUAL GRID ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media(max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    border-radius: 10px;
+    padding: 16px;
+    border: 1.5px solid;
+  }
+  .col-card.auto {
+    background: var(--teal-light);
+    border-color: #A7D7CA;
+  }
+  .col-card.manual {
+    background: var(--purple-light);
+    border-color: #C4B5FD;
+  }
+  .col-card h3 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .col-card.auto h3 { color: var(--teal); }
+  .col-card.manual h3 { color: var(--purple); }
+
+  .source-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .source-icon {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    background: var(--white);
+  }
+  .source-text strong { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); }
+  .source-text span { font-size: 12px; color: var(--text-mid); }
+
+  .manual-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+  .manual-dot {
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    margin-top: 6px;
+  }
+
+  /* ── OUTPUT SECTION ── */
+  .output-preview {
+    background: #1E293B;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12.5px;
+    color: #94A3B8;
+    line-height: 1.7;
+    position: relative;
+  }
+  .output-preview .md-h2 { color: #7DD3FC; font-weight: bold; }
+  .output-preview .md-body { color: #CBD5E1; }
+  .output-preview .md-bold { color: #F1F5F9; font-weight: bold; }
+  .output-preview .badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: #334155;
+    color: #94A3B8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .copy-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--green-light);
+    border: 1.5px solid #86EFAC;
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .copy-action .ca-icon { font-size: 22px; }
+  .copy-action .ca-text strong { font-size: 14px; color: var(--green); display: block; }
+  .copy-action .ca-text span { font-size: 12.5px; color: var(--text-mid); }
+
+  /* ── JIRA SECTION ── */
+  .jira-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .jira-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    color: var(--text-dark);
+  }
+  .jira-n {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    background: var(--amber);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 1px;
+  }
+
+  .jira-field-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .jira-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--amber-light);
+    border: 1px solid #FCD34D;
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 12.5px;
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  /* ── OPPORTUNITY COUNCIL ── */
+  .council-card {
+    background: linear-gradient(135deg, #0F3460 0%, #1A56A0 100%);
+    border-radius: var(--radius);
+    padding: 32px 32px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    color: white;
+    box-shadow: 0 8px 32px rgba(15,52,96,0.25);
+  }
+  .council-icon-wrap {
+    flex-shrink: 0;
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .council-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 6px;
+  }
+  .council-text p {
+    font-size: 14px;
+    color: #BDD7F5;
+    margin-bottom: 16px;
+    max-width: 500px;
+  }
+  .council-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .council-chip {
+    background: rgba(255,255,255,0.12);
+    color: #DBEAFE;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 10px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* ── SKILL BADGE ── */
+  .skill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--teal-light);
+    border: 1.5px solid #A7D7CA;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-light);
+    padding: 32px 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-tag">GoTo Resolve · Product Management</div>
+  <h1>From Idea to Opportunity Council</h1>
+  <p>How to use Claude Cowork to turn a product idea into a JIRA pitch item, ready for leadership review.</p>
+</div>
+
+<div class="page">
+<div class="flow">
+
+  <!-- ═══════════════════════════════════════════════
+       STEP 1 — WHERE TO WORK
+  ════════════════════════════════════════════════ -->
+  <div class="step step-1">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div class="step-header-text">
+        <h2>Open Claude Cowork</h2>
+        <p>This is where all the work happens — your AI workspace</p>
+      </div>
+      <div class="step-icon">💻</div>
+    </div>
+    <div class="step-body">
+      <div class="login-box">
+        <div style="font-size:32px">🤖</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text-dark);margin-bottom:4px;">Launch Claude Cowork on your computer</div>
+          <div style="font-size:13px;color:var(--text-mid);margin-bottom:8px;">Sign in with your GoTo account if prompted. Open a new conversation in the chat interface.</div>
+          <span class="login-url">Claude Cowork desktop app</span>
+        </div>
+      </div>
+      <div class="hint-row">
+        <div class="hint-chip"><span class="chip-icon">💬</span> Use the chat interface — just type naturally</div>
+        <div class="hint-chip"><span class="chip-icon">🔐</span> Make sure you're also logged into SharePoint, Tableau & Crayon in your browser</div>
+        <div class="hint-chip"><span class="chip-icon">📁</span> No need to open any files manually</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-arrow">↓</div></div>
+
+  <!-- ═══════════════════════════════════════════════
+       STEP 2 — PROMPT CLAUDE
+  ════════════════════════════════════════════════ -->
+  <div class="step step-2">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div class="step-header-text">
+        <h2>Describe Your Idea</h2>
+        <p>Just start typing — the Pitch Skill activates automatically</p>
+      </div>
+      <div class="step-icon">✍️</div>
+    </div>
+    <div class="step-body">
+
+      <div class="skill-badge">
+        ⚡ Pitch Skill activates automatically
+      </div>
+
+      <div class="prompt-example">
+        <strong>Example prompt</strong>
+        <em>"I want to pitch adding a mobile app to GoTo Resolve. I think it's a major retention driver for our SMB customers — help me build the pitch."</em>
+      </div>
+
+      <div class="prompt-example">
+        <strong>Another example</strong>
+        <em>"Help me make the case for an automated patch compliance reporting feature. Enterprise IT admins keep asking for this and I think it's a strong revenue play."</em>
+      </div>
+
+      <div class="section-label">What Claude does next</div>
+      <div class="two-col">
+
+        <div class="col-card auto">
+          <h3>🤖 Pulled automatically</h3>
+          <div class="source-row">
+            <div class="source-icon">📂</div>
+            <div class="source-text">
+              <strong>SharePoint</strong>
+              <span>Analyst Reports, Financial Data, Product Strategy, Product Data, Presentations</span>
+            </div>
+          </div>
+          <div class="source-row">
+            <div class="source-icon">📊</div>
+            <div class="source-text">
+              <strong>Tableau</strong>
+              <span>Live metrics — ARR, retention, customer counts, usage data</span>
+            </div>
+          </div>
+          <div class="source-row">
+            <div class="source-icon">⚔️</div>
+            <div class="source-text">
+              <strong>Crayon Battle Cards</strong>
+              <span>Competitor positioning &amp; differentiators</span>
+            </div>
+          </div>
+          <div class="source-row">
+            <div class="source-icon">🌐</div>
+            <div class="source-text">
+              <strong>Web Search</strong>
+              <span>Market size, industry trends, competitor moves</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-card manual">
+          <h3>✋ You provide</h3>
+          <div class="manual-item"><div class="manual-dot"></div><div>Your idea in plain language — what it is and who it's for</div></div>
+          <div class="manual-item"><div class="manual-dot"></div><div>Target customer segment or persona, if relevant</div></div>
+          <div class="manual-item"><div class="manual-dot"></div><div>Any specific competitor angle you want to highlight</div></div>
+          <div class="manual-item"><div class="manual-dot"></div><div>Metrics you already know (Claude will verify or supplement)</div></div>
+          <div class="manual-item"><div class="manual-dot"></div><div>Customer quotes, design links, or anything specific to include</div></div>
+          <div style="margin-top:12px;font-size:12px;color:var(--purple);font-style:italic;">💡 Your inputs take precedence over what Claude finds in the sources</div>
+        </div>
+
+      </div>
+
+      <div style="background:var(--slate-light);border:1px solid var(--border);border-radius:9px;padding:12px 16px;font-size:13px;color:var(--text-mid);">
+        <strong style="color:var(--text-dark);">Claude will ask you 3–4 short questions</strong> before drafting — things like the target audience and whether there's a specific competitor in focus. Answer briefly and it will get to work.
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-arrow">↓</div></div>
+
+  <!-- ═══════════════════════════════════════════════
+       STEP 3 — REVIEW OUTPUT
+  ════════════════════════════════════════════════ -->
+  <div class="step step-3">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div class="step-header-text">
+        <h2>Review &amp; Refine the Pitch Document</h2>
+        <p>Claude produces a structured, data-backed pitch — review it and ask for any changes</p>
+      </div>
+      <div class="step-icon">📄</div>
+    </div>
+    <div class="step-body">
+      <div class="section-label">What the output looks like</div>
+      <div class="output-preview">
+        <span class="badge">Markdown · JIRA-ready</span>
+        <div class="md-h2">## The Idea</div>
+        <div class="md-body">A native mobile app for GoTo Resolve, targeting SMB IT admins who need<br>to respond to device issues on the go...</div>
+        <br>
+        <div class="md-h2">## The Opportunity</div>
+        <div class="md-body"><span class="md-bold">Market:</span> Mobile IT management growing at 18% CAGR (Gartner 2024).<br><span class="md-bold">Retention impact:</span> SMB monthly churn currently at 4.2% — comparable<br>mobile features reduced churn by ~0.8pts in peer products...</div>
+        <br>
+        <div class="md-h2">## Competitive Landscape</div>
+        <div class="md-body">NinjaRMM and Atera both ship mobile apps. GoTo Resolve currently has<br>no mobile offering — this is an explicit gap in Crayon battle cards...</div>
+        <br>
+        <div class="md-h2">## What Success Looks Like</div>
+        <div class="md-body">— Reduce SMB churn from 4.2% → 3.5% within 12 months of launch<br>— 30% of SMB admins using mobile app within 6 months...</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">Refining the document</div>
+      <div class="hint-row" style="margin-bottom:16px;">
+        <div class="hint-chip">💬 Ask Claude to strengthen any section</div>
+        <div class="hint-chip">📊 Request a different metric or angle</div>
+        <div class="hint-chip">✂️ Ask it to shorten or expand</div>
+        <div class="hint-chip">🔄 Swap in your own numbers</div>
+      </div>
+
+      <div class="copy-action">
+        <div class="ca-icon">📋</div>
+        <div class="ca-text">
+          <strong>When you're happy — copy the full output</strong>
+          <span>Select all text in Claude's response and copy it to your clipboard. It's already formatted for JIRA.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-arrow">↓</div></div>
+
+  <!-- ═══════════════════════════════════════════════
+       STEP 4 — PASTE TO JIRA
+  ════════════════════════════════════════════════ -->
+  <div class="step step-4">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div class="step-header-text">
+        <h2>Create the JIRA Item</h2>
+        <p>Paste the pitch directly into a new JIRA initiative or epic</p>
+      </div>
+      <div class="step-icon">🎯</div>
+    </div>
+    <div class="step-body">
+      <div class="jira-steps">
+        <div class="jira-step">
+          <div class="jira-n">1</div>
+          <div>Go to JIRA and create a new <strong>Initiative</strong> or <strong>Epic</strong> item in the GoTo Resolve project</div>
+        </div>
+        <div class="jira-step">
+          <div class="jira-n">2</div>
+          <div>Give it a clear, short title that describes the idea (e.g. <em>"Mobile App for GoTo Resolve — SMB Retention Play"</em>)</div>
+        </div>
+        <div class="jira-step">
+          <div class="jira-n">3</div>
+          <div>Paste the Claude-generated pitch document into the <strong>description field</strong> — JIRA renders the Markdown formatting automatically</div>
+        </div>
+        <div class="jira-step">
+          <div class="jira-n">4</div>
+          <div>Set the label or component to <strong>"Pitch"</strong> so it's easy to filter and track through the review process</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">Fields to fill in</div>
+      <div class="jira-field-row">
+        <div class="jira-field">📌 Item type: Initiative / Epic</div>
+        <div class="jira-field">🏷️ Label: Pitch</div>
+        <div class="jira-field">👤 Assignee: You</div>
+        <div class="jira-field">📋 Description: paste here</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-arrow">↓</div></div>
+
+  <!-- ═══════════════════════════════════════════════
+       STEP 5 — OPPORTUNITY COUNCIL
+  ════════════════════════════════════════════════ -->
+  <div class="step step-5">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <div class="step-header-text">
+        <h2>Schedule in Opportunity Council</h2>
+        <p>Your pitch goes in front of Resolve leadership for a go / no-go decision</p>
+      </div>
+      <div class="step-icon">🏛️</div>
+    </div>
+    <div class="step-body">
+      <div class="council-card">
+        <div class="council-icon-wrap">🏛️</div>
+        <div class="council-text">
+          <h2>Opportunity Council</h2>
+          <p>Once your JIRA item is created, add it to the Opportunity Council meeting queue. This is a regular review with Resolve leadership where pitches are evaluated and decisions are made on what to pursue.</p>
+          <div class="council-chips">
+            <span class="council-chip">📅 Recurring leadership review</span>
+            <span class="council-chip">✅ Go / no-go decision</span>
+            <span class="council-chip">➡️ Approved items move to PRD phase</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .flow -->
+
+<!-- ── KANBAN SECTION ── -->
+<div style="margin-top:40px;">
+
+  <div style="text-align:center;margin-bottom:28px;">
+    <div style="display:inline-block;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:14px;">Product Pipeline</div>
+    <div style="font-size:20px;font-weight:700;color:var(--text-dark);margin-bottom:6px;">Your pitch enters the GoTo Resolve product pipeline</div>
+    <div style="font-size:13.5px;color:var(--text-mid);max-width:480px;margin:0 auto;">Once in JIRA, your item flows through four stages — from pitch to shipped product.</div>
+  </div>
+
+  <!-- KANBAN BOARD -->
+  <div style="position:relative;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;overflow:hidden;" id="kanban-board">
+
+    <!-- Column grid -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="kb-col-grid">
+
+      <!-- COL 1: Opportunity Backlog -->
+      <div class="kb-col" id="kb-col-0" style="border-radius:10px;padding:12px;min-height:310px;border:2px solid transparent;transition:border-color 0.3s,background 0.3s;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #BFDBF7;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--blue-mid);flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue-mid);">Opportunity Backlog</div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:1px;">Opportunity Council reviews</div>
+          </div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">PITCH</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">Unified alerting across device types</div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">PITCH</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">SSO enhancements for enterprise tier</div>
+        </div>
+        <!-- Spacer where the moving card sits in col 1 -->
+        <div id="kb-placeholder-0" style="height:110px;"></div>
+      </div>
+
+      <!-- COL 2: Problem Discovery -->
+      <div class="kb-col" id="kb-col-1" style="border-radius:10px;padding:12px;min-height:310px;border:2px solid transparent;transition:border-color 0.3s,background 0.3s;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #A7D7CA;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--teal);flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);">Problem Discovery</div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:1px;">Research &amp; validation</div>
+          </div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">DISCOVERY</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">Patch compliance dashboard research</div>
+        </div>
+        <div id="kb-placeholder-1" style="height:110px;"></div>
+      </div>
+
+      <!-- COL 3: Solution Discovery -->
+      <div class="kb-col" id="kb-col-2" style="border-radius:10px;padding:12px;min-height:310px;border:2px solid transparent;transition:border-color 0.3s,background 0.3s;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #C4B5FD;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--purple);flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);">Solution Discovery</div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:1px;">PRD, design &amp; scoping</div>
+          </div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">PRD</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">Remote script execution overhaul</div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">PRD</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">Role-based access for enterprise admins</div>
+        </div>
+        <div id="kb-placeholder-2" style="height:110px;"></div>
+      </div>
+
+      <!-- COL 4: In Delivery -->
+      <div class="kb-col" id="kb-col-3" style="border-radius:10px;padding:12px;min-height:310px;border:2px solid transparent;transition:border-color 0.3s,background 0.3s;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #86EFAC;">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);">In Delivery</div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:1px;">Engineering &amp; shipping</div>
+          </div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">IN BUILD</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">AI-assisted ticket triage</div>
+        </div>
+        <div class="kb-ghost-card" style="background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;opacity:0.6;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">IN BUILD</div>
+          <div style="font-size:11px;color:var(--text-mid);font-weight:500;">Device health score v2</div>
+        </div>
+        <div id="kb-placeholder-3" style="height:110px;"></div>
+      </div>
+
+    </div><!-- end col-grid -->
+
+    <!-- THE MOVING CARD — absolutely positioned over the board -->
+    <div id="kb-moving-card" style="
+      position:absolute;
+      top:0; left:0;
+      transition: left 0.75s cubic-bezier(0.4,0,0.2,1), top 0.75s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+      z-index:20;
+      pointer-events:none;
+    ">
+      <div style="background:linear-gradient(135deg,#0F3460 0%,#1A56A0 100%);border-radius:9px;padding:13px 14px;box-shadow:0 6px 20px rgba(15,52,96,0.30);border:1.5px solid rgba(255,255,255,0.15);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#7DD3FC;background:rgba(125,211,252,0.15);border-radius:4px;padding:2px 7px;">PITCH</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.4);">GR-4821</div>
+        </div>
+        <div style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3;">Mobile App for<br>GoTo Resolve</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:10px;">SMB retention · Enterprise growth</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;">N</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);">Nico · Mar 2026</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end kanban-board -->
+
+  <!-- Stage labels below the board -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;padding:0 20px;" id="kb-stage-labels">
+    <div class="kb-stage-label" id="kb-label-0" style="text-align:center;font-size:11.5px;padding:7px;border-radius:7px;transition:background 0.3s,color 0.3s;">
+      <div style="font-weight:700;">① Your pitch lives here</div>
+      <div style="font-size:10px;margin-top:2px;opacity:0.7;">Awaiting Opportunity Council</div>
+    </div>
+    <div class="kb-stage-label" id="kb-label-1" style="text-align:center;font-size:11.5px;padding:7px;border-radius:7px;transition:background 0.3s,color 0.3s;">
+      <div style="font-weight:700;">② After approval</div>
+      <div style="font-size:10px;margin-top:2px;opacity:0.7;">Customer &amp; market research</div>
+    </div>
+    <div class="kb-stage-label" id="kb-label-2" style="text-align:center;font-size:11.5px;padding:7px;border-radius:7px;transition:background 0.3s,color 0.3s;">
+      <div style="font-weight:700;">③ PRD &amp; design</div>
+      <div style="font-size:10px;margin-top:2px;opacity:0.7;">Define what to build</div>
+    </div>
+    <div class="kb-stage-label" id="kb-label-3" style="text-align:center;font-size:11.5px;padding:7px;border-radius:7px;transition:background 0.3s,color 0.3s;">
+      <div style="font-weight:700;">④ Build &amp; ship</div>
+      <div style="font-size:10px;margin-top:2px;opacity:0.7;">Engineering delivers</div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* Column active highlight colours per step */
+  .kb-col-active-0 { background: #EFF5FB !important; border-color: #1A56A0 !important; }
+  .kb-col-active-1 { background: #E6F4F0 !important; border-color: #0D7A5F !important; }
+  .kb-col-active-2 { background: #EDE9FE !important; border-color: #5B21B6 !important; }
+  .kb-col-active-3 { background: #DCFCE7 !important; border-color: #166534 !important; }
+
+  .kb-label-active-0 { background: var(--blue-light) !important; color: var(--blue-mid) !important; }
+  .kb-label-active-1 { background: var(--teal-light) !important; color: var(--teal) !important; }
+  .kb-label-active-2 { background: var(--purple-light) !important; color: var(--purple) !important; }
+  .kb-label-active-3 { background: var(--green-light) !important; color: var(--green) !important; }
+
+  .kb-stage-label { color: var(--text-mid); }
+</style>
+
+<script>
+(function() {
+  var STEP_DURATION = 2600; // ms per column
+  var PAUSE_AT_END  = 1400; // extra pause at last column before reset
+  var currentStep   = 0;
+  var timer         = null;
+  var initialized   = false;
+
+  var colIds    = ['kb-col-0','kb-col-1','kb-col-2','kb-col-3'];
+  var labelIds  = ['kb-label-0','kb-label-1','kb-label-2','kb-label-3'];
+  var phIds     = ['kb-placeholder-0','kb-placeholder-1','kb-placeholder-2','kb-placeholder-3'];
+  var activeColClasses   = ['kb-col-active-0','kb-col-active-1','kb-col-active-2','kb-col-active-3'];
+  var activeLabelClasses = ['kb-label-active-0','kb-label-active-1','kb-label-active-2','kb-label-active-3'];
+
+  function getCols()  { return colIds.map(function(id){ return document.getElementById(id); }); }
+  function getLabels(){ return labelIds.map(function(id){ return document.getElementById(id); }); }
+  function getPhs()   { return phIds.map(function(id){ return document.getElementById(id); }); }
+
+  function positionCard(step, animated) {
+    var card   = document.getElementById('kb-moving-card');
+    var board  = document.getElementById('kanban-board');
+    var ph     = getPhs()[step];
+    var col    = getCols()[step];
+
+    if (!card || !board || !ph || !col) return;
+
+    // Get positions relative to the board container
+    var boardRect = board.getBoundingClientRect();
+    var colRect   = col.getBoundingClientRect();
+    var phRect    = ph.getBoundingClientRect();
+
+    var targetLeft = colRect.left - boardRect.left + 12; // 12 = col padding
+    var targetTop  = phRect.top  - boardRect.top;
+    var cardWidth  = colRect.width - 24; // subtract col padding both sides
+
+    if (!animated) {
+      card.style.transition = 'none';
+    } else {
+      card.style.transition = 'left 0.75s cubic-bezier(0.4,0,0.2,1), top 0.75s cubic-bezier(0.4,0,0.2,1)';
+    }
+
+    card.style.left  = targetLeft + 'px';
+    card.style.top   = targetTop  + 'px';
+    card.style.width = cardWidth  + 'px';
+  }
+
+  function highlightStep(step) {
+    var cols   = getCols();
+    var labels = getLabels();
+
+    cols.forEach(function(col, i) {
+      activeColClasses.forEach(function(cls){ col.classList.remove(cls); });
+      if (i === step) col.classList.add(activeColClasses[step]);
+    });
+    labels.forEach(function(lbl, i) {
+      activeLabelClasses.forEach(function(cls){ lbl.classList.remove(cls); });
+      if (i === step) lbl.classList.add(activeLabelClasses[step]);
+    });
+  }
+
+  function goToStep(step, animated) {
+    currentStep = step;
+    positionCard(step, animated);
+    highlightStep(step);
+  }
+
+  function nextStep() {
+    var next = (currentStep + 1) % 4;
+    if (next === 0) {
+      // Snap back to col 0 without animation, then resume
+      goToStep(0, false);
+      // Force reflow so the position snaps before re-enabling transition
+      document.getElementById('kb-moving-card').offsetHeight;
+      timer = setTimeout(function(){
+        goToStep(1, true);
+        scheduleNext();
+      }, 80);
+    } else {
+      goToStep(next, true);
+      scheduleNext();
+    }
+  }
+
+  function scheduleNext() {
+    var pause = (currentStep === 3) ? STEP_DURATION + PAUSE_AT_END : STEP_DURATION;
+    timer = setTimeout(nextStep, pause);
+  }
+
+  function init() {
+    if (initialized) return;
+    initialized = true;
+    goToStep(0, false);
+    timer = setTimeout(function(){
+      goToStep(1, true);
+      scheduleNext();
+    }, STEP_DURATION);
+  }
+
+  // Init after layout settles
+  if (document.readyState === 'complete') {
+    setTimeout(init, 200);
+  } else {
+    window.addEventListener('load', function(){ setTimeout(init, 200); });
+  }
+
+  // Re-position on resize without animation
+  window.addEventListener('resize', function(){
+    positionCard(currentStep, false);
+  });
+})();
+</script>
+
+<!-- ── WHAT COMES NEXT ── -->
+<div style="margin-top:40px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:24px 28px;box-shadow:var(--shadow);">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+    <div style="font-size:22px;">🚀</div>
+    <div>
+      <div style="font-size:15px;font-weight:700;color:var(--text-dark);">After approval — Phase 2: PRD</div>
+      <div style="font-size:13px;color:var(--text-mid);">If the Opportunity Council approves your pitch, the next step is writing the Product Requirement Document (PRD). Use the <strong>PRD Skill</strong> in Claude Cowork — paste in your approved pitch and Claude will build out the full requirements document.</div>
+    </div>
+  </div>
+  <div class="hint-row">
+    <div class="hint-chip">📄 Paste approved pitch into Claude</div>
+    <div class="hint-chip">⚡ PRD Skill activates automatically</div>
+    <div class="hint-chip">📋 Paste PRD output into the same JIRA item</div>
+  </div>
+</div>
+
+<div class="footer">GoTo Resolve · Product Management · Claude PM Skills v1.0</div>
+
+</div><!-- end .page -->
+</body>
+</html>
