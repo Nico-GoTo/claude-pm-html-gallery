@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Resolve Funnel Drop-off Analysis — Q1 2026",
+    "author": "Nico Sauter",
+    "date": "2026-03-28",
+    "summary": "Deep-dive into trial-to-paid conversion funnel for GoTo Resolve. Identifies the three biggest drop-off points and proposes PLG interventions.",
+    "tags": ["PLG", "funnel", "Resolve", "conversion"],
+    "file": "analyses/resolve-funnel-q1-2026.html"
+  },
+  {
+    "title": "Nexus Agent Interaction Patterns — User Research Synthesis",
+    "author": "Edouard",
+    "date": "2026-03-22",
+    "summary": "Synthesis of 12 user interviews on how IT technicians want to interact with AI agents. Key finding: technicians prefer 'supervise and approve' over full autonomy.",
+    "tags": ["Nexus", "AI", "user-research", "Resolve"],
+    "file": "analyses/nexus-agent-patterns.html"
+  },
+  {
+    "title": "Competitive Landscape — Agentic IT Management Tools",
+    "author": "Wiebke",
+    "date": "2026-03-15",
+    "summary": "Comparison of emerging agentic IT platforms (Moveworks, Aisera, Nexthink Infinity) and where Resolve's headless execution engine fits in the ecosystem.",
+    "tags": ["competitive", "AI", "strategy", "Resolve"],
+    "file": "analyses/competitive-agentic-it.html"
+  },
+  {
+    "title": "Rescue Session Volume Trends — 6-Month Retrospective",
+    "author": "Lauren Richter",
+    "date": "2026-03-10",
+    "summary": "Analysis of Rescue session volumes, peak times, and resolution rates. Highlights seasonal patterns and implications for staffing recommendations.",
+    "tags": ["Rescue", "analytics", "trends"],
+    "file": "analyses/rescue-session-trends.html"
+  },
+  {
+    "title": "RMM Feature Adoption Heatmap",
+    "author": "Eldad",
+    "date": "2026-02-28",
+    "summary": "Which RMM features are actually being used vs. which we're investing in. Reveals a stark gap between roadmap priorities and real customer behavior.",
+    "tags": ["RMM", "adoption", "Resolve", "analytics"],
+    "file": "analyses/rmm-feature-adoption.html"
+  }
+]

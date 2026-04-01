@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Analysis Gallery</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-muted: #6c757d;
+    --accent: #4361ee;
+    --accent-light: #e8ecff;
+    --border: #e2e8f0;
+    --tag-bg: #edf2f7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+  }
+  .header p {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.95rem;
+  }
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.2rem;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+  }
+  .stats-bar span strong {
+    color: rgba(255,255,255,0.95);
+    font-size: 1.1rem;
+  }
+
+  /* Controls */
+  .controls {
+    max-width: 1100px;
+    margin: -1.2rem auto 0;
+    padding: 0 1.5rem;
+    position: relative;
+    z-index: 10;
+  }
+  .search-bar {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-bar input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+  .search-bar select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* Tag filters */
+  .tag-filters {
+    max-width: 1100px;
+    margin: 1rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tag-filters .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .tag-btn {
+    background: var(--tag-bg);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+  .tag-btn:hover { background: var(--accent-light); color: var(--accent); }
+  .tag-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* Grid */
+  .gallery {
+    max-width: 1100px;
+    margin: 1.5rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.2rem;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+  .card-author {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .card h2 {
+    font-size: 1.05rem;
+    font-weight: 650;
+    margin-bottom: 0.5rem;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .card p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    flex: 1;
+    margin-bottom: 0.8rem;
+  }
+  .card-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .card-tag {
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+  }
+  .empty-state svg { margin-bottom: 1rem; opacity: 0.4; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  /* Sort indicator */
+  .sort-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PM Analysis Gallery</h1>
+  <p>Shared analyses, reports, and insights from the team</p>
+  <div class="stats-bar">
+    <span><strong id="totalCount">0</strong> analyses</span>
+    <span><strong id="authorCount">0</strong> contributors</span>
+    <span>Last updated: <strong id="lastUpdated">—</strong></span>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by title, author, or summary…" />
+    <span class="sort-label">Author:</span>
+    <select id="authorFilter">
+      <option value="">All authors</option>
+    </select>
+    <span class="sort-label">Sort:</span>
+    <select id="sortSelect">
+      <option value="date-desc">Newest first</option>
+      <option value="date-asc">Oldest first</option>
+      <option value="title-asc">Title A–Z</option>
+      <option value="author-asc">Author A–Z</option>
+    </select>
+  </div>
+</div>
+
+<div class="tag-filters" id="tagFilters">
+  <span class="label">Tags</span>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<div class="footer">
+  PM Analysis Gallery · To add an analysis, see the <a href="https://github.com/YOUR_ORG/pm-analysis-gallery#adding-an-analysis" style="color:var(--accent)">contribution guide</a>
+</div>
+
+<script>
+let catalog = [];
+let activeTags = new Set();
+
+async function init() {
+  try {
+    const resp = await fetch('catalog.json');
+    catalog = await resp.json();
+  } catch (e) {
+    catalog = [];
+  }
+  populateFilters();
+  render();
+}
+
+function populateFilters() {
+  // Authors
+  const authors = [...new Set(catalog.map(c => c.author))].sort();
+  const authorSelect = document.getElementById('authorFilter');
+  authors.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    authorSelect.appendChild(opt);
+  });
+
+  // Tags
+  const allTags = [...new Set(catalog.flatMap(c => c.tags || []))].sort();
+  const tagContainer = document.getElementById('tagFilters');
+  allTags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-btn';
+    btn.textContent = tag;
+    btn.onclick = () => {
+      if (activeTags.has(tag)) { activeTags.delete(tag); btn.classList.remove('active'); }
+      else { activeTags.add(tag); btn.classList.add('active'); }
+      render();
+    };
+    tagContainer.appendChild(btn);
+  });
+
+  // Stats
+  document.getElementById('totalCount').textContent = catalog.length;
+  document.getElementById('authorCount').textContent = authors.length;
+  if (catalog.length > 0) {
+    const dates = catalog.map(c => c.date).sort().reverse();
+    document.getElementById('lastUpdated').textContent = dates[0];
+  }
+}
+
+function getFiltered() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const authorFilter = document.getElementById('authorFilter').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let items = catalog.filter(item => {
+    const matchesSearch = !query ||
+      item.title.toLowerCase().includes(query) ||
+      item.author.toLowerCase().includes(query) ||
+      (item.summary || '').toLowerCase().includes(query) ||
+      (item.tags || []).some(t => t.toLowerCase().includes(query));
+
+    const matchesAuthor = !authorFilter || item.author === authorFilter;
+
+    const matchesTags = activeTags.size === 0 ||
+      [...activeTags].every(tag => (item.tags || []).includes(tag));
+
+    return matchesSearch && matchesAuthor && matchesTags;
+  });
+
+  // Sort
+  items.sort((a, b) => {
+    switch (sort) {
+      case 'date-desc': return (b.date || '').localeCompare(a.date || '');
+      case 'date-asc':  return (a.date || '').localeCompare(b.date || '');
+      case 'title-asc': return a.title.localeCompare(b.title);
+      case 'author-asc': return a.author.localeCompare(b.author);
+      default: return 0;
+    }
+  });
+
+  return items;
+}
+
+function render() {
+  const items = getFiltered();
+  const gallery = document.getElementById('gallery');
+
+  if (items.length === 0) {
+    gallery.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <p>No analyses match your filters</p>
+      </div>`;
+    return;
+  }
+
+  gallery.innerHTML = items.map(item => `
+    <a class="card" href="${item.file}" title="Open: ${item.title}">
+      <div class="card-meta">
+        <span class="card-author">${item.author}</span>
+        <span>${item.date}</span>
+      </div>
+      <h2>${item.title}</h2>
+      <p>${item.summary || ''}</p>
+      <div class="card-tags">
+        ${(item.tags || []).map(t => `<span class="card-tag">${t}</span>`).join('')}
+      </div>
+    </a>
+  `).join('');
+}
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('authorFilter').addEventListener('change', render);
+document.getElementById('sortSelect').addEventListener('change', render);
+
+init();
+</script>
+</body>
+</html>
